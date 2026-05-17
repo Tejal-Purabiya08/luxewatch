@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const Product = require("../Model/productModel");
+const Product = require("../model/productModel");
 
 
 // ➤ CREATE PRODUCT

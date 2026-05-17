@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const User = require("../Model/userModel");
+const User = require("../model/userModel");
 
 const { protect, adminOnly } = require("../middleware/authMiddleware");
 
