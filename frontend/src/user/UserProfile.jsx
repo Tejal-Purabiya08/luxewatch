@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
 import Swal from "sweetalert2";
+import API from "../api/axios";
 
 function UserProfile() {
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ function UserProfile() {
 
     const fetchUserMetrics = async () => {
       try {
-        const cartRes = await axios.get(`http://localhost:5000/api/cart/${user._id}`);
+        const cartRes = await API.get(`/api/cart/${user._id}`);
         setMetricCounts({
           orders: 0, 
           wishlist: 0,
@@ -75,8 +75,8 @@ function UserProfile() {
       };
 
       // Direct call to your backend PUT route
-      const res = await axios.put(
-        `http://localhost:5000/api/users/${sessionUser._id}`,
+      const res = await API.put(
+        `/api/users/${sessionUser._id}`,
         formData,
         config
       );

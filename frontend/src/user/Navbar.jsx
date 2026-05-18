@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Swal from "sweetalert2";
-import axios from "axios";
+import API from "../api/axios";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -20,8 +20,8 @@ function Navbar() {
 
       if (!user) return;
 
-      const res = await axios.get(
-        `http://localhost:5000/api/cart/${user._id}`
+      const res = await API.get(
+        `/api/cart/${user._id}`
       );
 
       const count = res.data?.items?.length || 0;

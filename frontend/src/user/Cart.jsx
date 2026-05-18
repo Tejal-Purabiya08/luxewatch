@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
 import { Link, useNavigate } from "react-router-dom";
+import API from "../api/axios";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -19,8 +19,8 @@ function Cart() {
       try {
         if (!userId) return;
 
-        const res = await axios.get(
-          `http://localhost:5000/api/cart/${userId}`
+        const res = await API.get(
+          `/api/cart/${userId}`
         );
 
         const items = res.data?.items || [];
@@ -60,8 +60,8 @@ function Cart() {
     setCartItems(updated);
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/cart/save",
+      await API.post(
+        "/api/cart/save",
         {
           userId,
           items: updated.map((item) => ({
@@ -78,8 +78,8 @@ function Cart() {
   // ✅ REMOVE ITEM
   const removeItem = async (productId) => {
     try {
-      await axios.delete(
-        "http://localhost:5000/api/cart/remove",
+      await API.delete(
+        `/api/cart/remove`,
         {
           data: {
             userId,
@@ -94,8 +94,8 @@ function Cart() {
 
       setCartItems(updated);
 
-      await axios.post(
-        "http://localhost:5000/api/cart/save",
+      await API.post(
+        "/api/cart/save",
         {
           userId,
           items: updated.map((item) => ({

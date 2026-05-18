@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 import Hero from "./Hero";
+import API from "../api/axios";
 
 function Home() {
   const [products, setProducts] = useState([]);
@@ -24,7 +24,7 @@ function Home() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products");
+      const res = await API.get("/api/products");
       setProducts(res.data);
       setFiltered(res.data);
 
@@ -70,7 +70,7 @@ function Home() {
         return;
       }
 
-      await axios.post("http://localhost:5000/api/cart/add", {
+      await API.post("/api/cart/add", {
         userId: user._id,
         productId: product._id,
         quantity,
@@ -110,13 +110,10 @@ function Home() {
       return;
     }
 
-    await axios.post(
-      "http://localhost:5000/api/wishlist/add",
-      {
-        userId: user._id,
-        productId: product._id,
-      }
-    );
+    await API.post("/api/wishlist/add", {
+      userId: user._id,
+      productId: product._id,
+    });
 
     Swal.fire({
       icon: "success",

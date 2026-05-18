@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState ,useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { motion } from "framer-motion";
+import API from "../api/axios";
 
 function AdminProductDetails() {
   const { id } = useParams();
@@ -9,21 +9,19 @@ function AdminProductDetails() {
 
   const [product, setProduct] = useState(null);
 
-  useEffect(() => {
-    fetchProduct();
-  }, [id]);
+ const fetchProduct = useCallback(async () => {
+  try {
+    const res = await API.get(`/api/products/${id}`);
 
-  const fetchProduct = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/api/products/${id}`,
-      );
+    setProduct(res.data);
+  } catch (error) {
+    console.log(error);
+  }
+}, [id]);
 
-      setProduct(res.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+useEffect(() => {
+  fetchProduct();
+}, [fetchProduct]);
 
   if (!product) {
     return (

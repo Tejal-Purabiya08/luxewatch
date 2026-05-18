@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import DashboardCards from "./component/DashboardCards";
 import {
@@ -11,6 +10,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import API from "../api/axios";
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -44,11 +44,11 @@ function Dashboard() {
       const token = localStorage.getItem("token");
 
       const [productRes, userRes, orderRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/products"),
-        axios.get("http://localhost:5000/api/users", {
+        API.get("/api/products"),
+        API.get("/api/users", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:5000/api/orders/admin/all"),
+        API.get("/api/orders/admin/all"),
       ]);
 
       const productsData = productRes.data;

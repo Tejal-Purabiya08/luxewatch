@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import Swal from "sweetalert2";
+import API from "../api/axios";
 
 function Register() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ function Register() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/users/register", formData);
+      await API.post("/api/users/register", formData);
 
       Swal.fire({
         icon: "success",

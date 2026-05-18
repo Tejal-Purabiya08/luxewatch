@@ -23,8 +23,10 @@ app.use(express.json());
 // ✅ CORS FIX (IMPORTANT for Vercel frontend)
 app.use(
   cors({
-    origin: "*", // dev mode (production me change karna hoga)
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    origin: [
+      "http://localhost:3000",
+      "https://luxewatchh.netlify.app"
+    ],
     credentials: true,
   })
 );

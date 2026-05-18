@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API from "../api/axios";
 
 function Orders() {
   const [orders, setOrders] = useState([]);
@@ -14,8 +14,8 @@ function Orders() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/orders/${userId}`
+        const res = await API.get(
+          `/api/orders/${userId}`
         );
         setOrders(res.data);
       } catch (err) {
@@ -246,7 +246,7 @@ function Orders() {
                     </div>
                     <div className="d-flex gap-2">
                       <a
-                        href={`http://localhost:5000/api/orders/invoice/${order._id}`}
+                        href={`${process.env.REACT_APP_API_URL}/api/orders/invoice/${order._id}`}
                         target="_blank"
                         rel="noreferrer"
                         className="btn btn-modal-secondary px-3 py-2"

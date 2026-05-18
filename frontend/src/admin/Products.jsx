@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import API from "../api/axios";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -19,7 +19,7 @@ function Products() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products");
+      const res = await API.get("/api/products");
       setProducts(res.data);
       setLoading(false);
     } catch (err) {
@@ -192,10 +192,10 @@ function Products() {
     if (formValues) {
       try {
         if (isEdit) {
-          await axios.put(`http://localhost:5000/api/products/${product._id}`, formValues);
+          await API.put(`/api/products/${product._id}`, formValues);
           Swal.fire({ icon: "success", title: "Catalog Updated", showConfirmButton: false, timer: 1500 });
         } else {
-          await axios.post("http://localhost:5000/api/products/add", formValues);
+          await API.post("/api/products/add", formValues);
           Swal.fire({ icon: "success", title: "Product Added", showConfirmButton: false, timer: 1500 });
         }
         fetchProducts();
@@ -216,7 +216,7 @@ function Products() {
       customClass: { confirmButton: "rounded-pill px-4", cancelButton: "rounded-pill px-4" },
     }).then(async (result) => {
       if (result.isConfirmed) {
-        await axios.delete(`http://localhost:5000/api/products/${id}`);
+        await API.delete(`/api/products/${id}`);
         fetchProducts();
         Swal.fire({ icon: "success", title: "Deleted!", showConfirmButton: false, timer: 1500 });
       }

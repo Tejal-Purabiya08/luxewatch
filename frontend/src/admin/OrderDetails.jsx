@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState,useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { motion } from "framer-motion";
+import API from "../api/axios";
 
 function OrderDetails() {
   const { id } = useParams();
@@ -10,27 +10,29 @@ function OrderDetails() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchOrder();
-  }, [id]);
+const fetchOrder = useCallback(async () => {
+  try {
+    const res = await API.get(
+      `/api/orders/single/${id}`,
+    );
 
-  const fetchOrder = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/api/orders/single/${id}`,
-      );
-      setOrder(res.data);
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
-    }
-  };
+    setOrder(res.data);
+    setLoading(false);
+
+  } catch (err) {
+    console.error(err);
+    setLoading(false);
+  }
+}, [id]);
+
+useEffect(() => {
+  fetchOrder();
+}, [fetchOrder]);
 
   const updateStatus = async (newStatus) => {
     try {
-      await axios.put(
-        `http://localhost:5000/api/orders/admin/update-status/${id}`,
+      await API.put(
+        `/api/orders/admin/update-status/${id}`,
         {
           status: newStatus,
 

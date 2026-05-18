@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
+import API from "../api/axios";
 
 function Profile() {
   const [admin, setAdmin] = useState(null);
@@ -21,8 +21,8 @@ function Profile() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(
-        "http://localhost:5000/api/users/profile/me",
+      const res = await API.get(
+        "/api/users/profile/me",
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -66,8 +66,8 @@ function Profile() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.put(
-        `http://localhost:5000/api/users/${admin._id}`,
+      const res = await API.put(
+        `/api/users/${admin._id}`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } },
       );

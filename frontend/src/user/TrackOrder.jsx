@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import API from "../api/axios";
 
 function TrackOrder() {
   const { id } = useParams();
@@ -11,8 +11,8 @@ function TrackOrder() {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/orders/single/${id}`
+        const res = await API.get(
+          `/api/orders/single/${id}`
         );
         setOrder(res.data);
       } catch (err) {

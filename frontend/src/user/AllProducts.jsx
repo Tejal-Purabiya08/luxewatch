@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import Navbar from "./Navbar";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import API from "../api/axios";
 
 function AllProducts() {
   const [products, setProducts] = useState([]);
@@ -19,7 +18,7 @@ function AllProducts() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products");
+      const res = await API.get("/api/products");
       setProducts(res.data);
     } catch (err) {
       console.log(err);
@@ -29,7 +28,7 @@ function AllProducts() {
   // ADD TO CART WITH LIVE UPDATE & QTY SUPPORT
   const addToCart = async (product, quantity = 1) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const user = JSON.parse(localStorage.getItem("user") || "null");
 
       if (!user) {
         Swal.fire({
@@ -43,7 +42,7 @@ function AllProducts() {
         return;
       }
 
-      await axios.post("http://localhost:5000/api/cart/add", {
+      await API.post("/api/cart/add", {
         userId: user._id,
         productId: product._id,
         quantity,
@@ -88,7 +87,7 @@ function AllProducts() {
         return;
       }
 
-      await axios.post("http://localhost:5000/api/wishlist/add", {
+      await API.post("/api/wishlist/add", {
         userId: user._id,
         productId: product._id,
       });
@@ -113,6 +112,14 @@ function AllProducts() {
       });
     }
   };
+
+  const handleCategoryClick = (item) => {
+  if (item?.category && Array.isArray(item.category) && item.category.length > 0) {
+    navigate(`/category/${item.category[0]}`);
+  } else {
+    console.log("No category found for this product");
+  }
+};
 
   // MODAL HANDLERS
   const openModal = (product) => {
@@ -182,9 +189,9 @@ function AllProducts() {
                   <div className="image-holder">
                     <div className="image-glow"></div>
                     <img
-                      src={item.image}
+                     src={item.image || "/placeholder.jpg"}
                       alt={item.name}
-                      onClick={() => navigate(`/category/${item.category?.[0]}`)}
+                      onClick={() => handleCategoryClick(item)}
                       className="main-watch-img"
                     />
 

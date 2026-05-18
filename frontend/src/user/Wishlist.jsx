@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState ,useCallback} from "react";
 import Swal from "sweetalert2";
 import { Link, useNavigate } from "react-router-dom";
+import API from "../api/axios";
 
 function Wishlist() {
   const [wishlistItems, setWishlistItems] = useState([]);
@@ -9,40 +9,40 @@ function Wishlist() {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?._id;
 
-  useEffect(() => {
-    fetchWishlist();
-  }, [userId]);
 
-  const fetchWishlist = async () => {
-    try {
-      if (!userId) return;
-      const res = await axios.get(
-        `http://localhost:5000/api/wishlist/${userId}`
-      );
+const fetchWishlist = useCallback(async () => {
+  try {
+    if (!userId) return;
 
-      const items = res.data?.items || [];
+    const res = await API.get(`/api/wishlist/${userId}`);
 
-      setWishlistItems(
-        items
-          .filter((i) => i.productId)
-          .map((i) => ({
-            _id: i.productId._id,
-            name: i.productId.name,
-            image: i.productId.image,
-            brand: i.productId.brand,
-            price: i.productId.price,
-          }))
-      );
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    const items = res.data?.items || [];
+
+    setWishlistItems(
+      items
+        .filter((i) => i.productId)
+        .map((i) => ({
+          _id: i.productId._id,
+          name: i.productId.name,
+          image: i.productId.image,
+          brand: i.productId.brand,
+          price: i.productId.price,
+        }))
+    );
+  } catch (err) {
+    console.log(err);
+  }
+}, [userId]);
+
+useEffect(() => {
+  fetchWishlist();
+}, [fetchWishlist]);
 
   // REMOVE ITEM
   const removeItem = async (productId) => {
     try {
-      await axios.delete(
-        "http://localhost:5000/api/wishlist/remove",
+      await API.delete(
+        `/api/wishlist/remove`,
         {
           data: {
             userId,
@@ -73,8 +73,8 @@ function Wishlist() {
   // MOVE TO CART
   const moveToCart = async (item) => {
     try {
-      await axios.post(
-        "http://localhost:5000/api/cart/add",
+      await API.post(
+        `/api/cart/add`,
         {
           userId,
           productId: item._id,

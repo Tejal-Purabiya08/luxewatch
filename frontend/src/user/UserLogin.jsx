@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import Swal from "sweetalert2";
+import API from "../api/axios";
 
 function UserLogin() {
   const navigate = useNavigate();
@@ -15,8 +15,8 @@ const handleLogin = async (e) => {
   setIsLoading(true);
 
   try {
-    const res = await axios.post(
-      "http://localhost:5000/api/users/login",
+    const res = await API.post(
+      "/api/users/login",
       {
         email,
         password,

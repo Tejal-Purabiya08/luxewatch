@@ -1,28 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState ,useCallback} from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import API from "../api/axios";
 
 function UserDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    fetchUser();
-  }, [id]);
+const fetchUser = useCallback(async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-  const fetchUser = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:5000/api/users/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(res.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    const res = await API.get(`/api/users/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setUser(res.data);
+  } catch (error) {
+    console.log(error);
+  }
+}, [id]);
+
+useEffect(() => {
+  fetchUser();
+}, [fetchUser]);
 
   if (!user) {
     return (

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState ,useCallback} from "react";
+import { useParams, useNavigate  } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
+import API from "../api/axios";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -16,31 +16,43 @@ function ProductDetails() {
   const [showModal, setShowModal] = useState(false);
   const [qty, setQty] = useState(1);
 
-  useEffect(() => {
-    fetchProduct();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [id]);
 
-  const fetchProduct = async () => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/products/${id}`);
-      setProduct(res.data);
-      fetchRelatedProducts(res.data.category?.[0], res.data._id);
-    } catch (error) {
-      console.log(error);
-      Swal.fire({
-        title: "Error",
-        text: "Product not found",
-        icon: "error",
-        background: "#1a1a2e",
-        color: "#fff",
-      });
-    }
-  };
+
+const fetchProduct = useCallback(async () => {
+  try {
+    const res = await API.get(`/api/products/${id}`);
+
+    setProduct(res.data);
+
+    fetchRelatedProducts(
+      res.data.category?.[0],
+      res.data._id
+    );
+  } catch (error) {
+    console.log(error);
+
+    Swal.fire({
+      title: "Error",
+      text: "Product not found",
+      icon: "error",
+      background: "#1a1a2e",
+      color: "#fff",
+    });
+  }
+}, [id]);
+
+useEffect(() => {
+  fetchProduct();
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}, [fetchProduct]);
 
   const fetchRelatedProducts = async (category, currentId) => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products");
+      const res = await API.get("/api/products");
       const filtered = res.data.filter(
         (item) => item._id !== currentId && item.category?.[0] === category
       );
@@ -69,7 +81,7 @@ function ProductDetails() {
         return;
       }
 
-      await axios.post("http://localhost:5000/api/cart/add", {
+      await API.post("/api/cart/add", {
         userId: user._id,
         productId: targetProduct._id,
         quantity: quantityCount,
@@ -116,7 +128,7 @@ function ProductDetails() {
         return;
       }
 
-      await axios.post("http://localhost:5000/api/wishlist/add", {
+      await API.post("/api/wishlist/add", {
         userId: user._id,
         productId: targetProduct._id,
       });

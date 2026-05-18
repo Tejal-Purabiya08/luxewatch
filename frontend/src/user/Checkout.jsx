@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate, useLocation } from "react-router-dom";
+import API from "../api/axios";
 
 function Checkout() {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ function Checkout() {
   const finalTotal = location.state?.finalTotal || 0;
 
   const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user?._id;
+const userId = user?._id;
 
   const [paymentMethod, setPaymentMethod] = useState("RAZORPAY");
 
@@ -23,19 +23,22 @@ function Checkout() {
     address: "",
   });
 
-  useEffect(() => {
-    if (!userId) return navigate("/");
+useEffect(() => {
+  if (!userId) {
+    navigate("/");
+    return;
+  }
 
-    if (user) {
-      setForm({
-        name: user.name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        city: user.city || "",
-        address: user.address || "",
-      });
-    }
-  }, [userId]);
+  setForm({
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    city: user?.city || "",
+    address: user?.address || "",
+  });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [userId]);
 
   // FORM CHANGE + PHONE LIMIT
   const handleChange = (e) => {
@@ -80,8 +83,8 @@ function Checkout() {
       // ======================
       const token = localStorage.getItem("token");
 
-      const updatedUserRes = await axios.put(
-        `http://localhost:5000/api/users/${userId}`,
+      const updatedUserRes = await API.put(
+        `/api/users/${userId}`,
         {
           name: form.name,
           email: form.email,
@@ -102,7 +105,7 @@ function Checkout() {
       // CASH ON DELIVERY
       // ======================
       if (paymentMethod === "COD") {
-        await axios.post("http://localhost:5000/api/orders/place", {
+        await API.post("/api/orders/place", {
           userId,
           items: cartItems.map((item) => ({
             productId: item._id,
@@ -134,7 +137,7 @@ function Checkout() {
       // ======================
       // CREATE ORDER IN DB
       // ======================
-      const orderRes = await axios.post("http://localhost:5000/api/orders/place", {
+      const orderRes = await API.post("/api/orders/place", {
         userId,
         items: cartItems.map((item) => ({
           productId: item._id,
@@ -156,7 +159,7 @@ function Checkout() {
       // ======================
       // CREATE RAZORPAY ORDER
       // ======================
-      const razorRes = await axios.post("http://localhost:5000/api/payment/create-order", {
+      const razorRes = await API.post("/api/payment/create-order", {
         amount: finalTotal,
       });
 
@@ -182,7 +185,7 @@ function Checkout() {
         },
         handler: async function (response) {
           try {
-            await axios.post("http://localhost:5000/api/orders/verify-payment", {
+            await API.post("/api/orders/verify-payment", {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,

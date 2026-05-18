@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
+import API from "../api/axios";
 
 function CategoryPage() {
   const { name } = useParams();
@@ -15,7 +15,6 @@ function CategoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
   const [sortOption, setSortOption] = useState("");
   const [priceRange, setPriceRange] = useState(50000);
 
@@ -24,9 +23,6 @@ function CategoryPage() {
   const [showModal, setShowModal] = useState(false);
   const [qty, setQty] = useState(1);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [name]);
 
   // FILTERED PRODUCTS
   const filteredProducts = products
@@ -39,11 +35,6 @@ function CategoryPage() {
     .filter((item) =>
       selectedCategory
         ? item.category?.includes(selectedCategory)
-        : true
-    )
-    .filter((item) =>
-      selectedColor
-        ? item.color?.toLowerCase() === selectedColor.toLowerCase()
         : true
     )
     .filter((item) => item.price <= priceRange)
@@ -60,13 +51,12 @@ function CategoryPage() {
   // UNIQUE VALUES FOR FILTERS
   const brands = [...new Set(products.map((p) => p.brand))];
   const categories = [...new Set(products.flatMap((p) => p.category || []))];
-  const colors = [...new Set(products.map((p) => p.color).filter(Boolean))];
 
-  const fetchProducts = async () => {
+  const fetchProducts = React.useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/products?category=${name}`
+      const res = await API.get(
+        `/api/products?category=${name}`
       );
       setProducts(res.data);
     } catch (error) {
@@ -74,7 +64,11 @@ function CategoryPage() {
     } finally {
       setLoading(false);
     }
-  };
+  },[name]);
+
+    useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   // ADD TO CART FUNCTION
   const handleAddToCart = async (product, quantity = 1) => {
@@ -93,7 +87,7 @@ function CategoryPage() {
         return;
       }
 
-      await axios.post("http://localhost:5000/api/cart/add", {
+      await API.post("/api/cart/add", {
         userId: user._id,
         productId: product._id,
         quantity,
@@ -139,7 +133,7 @@ function CategoryPage() {
         return;
       }
 
-      await axios.post("http://localhost:5000/api/wishlist/add", {
+      await API.post("/api/wishlist/add", {
         userId: user._id,
         productId: product._id,
       });
@@ -261,17 +255,18 @@ function CategoryPage() {
               </select>
             </div>
             <div className="col-lg-2 col-md-6">
-              <label className="filter-label">Color</label>
               <select
-                className="form-select premium-filter-input text-capitalize"
-                value={selectedColor}
-                onChange={(e) => setSelectedColor(e.target.value)}
-              >
-                <option value="">All Colors</option>
-                {colors.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+  className="form-select premium-filter-input"
+  value={selectedCategory}
+  onChange={(e) => setSelectedCategory(e.target.value)}
+>
+  <option value="">All Categories</option>
+  {categories.map((c) => (
+    <option key={c} value={c}>
+      {c}
+    </option>
+  ))}
+</select>
             </div>
             <div className="col-lg-2 col-md-6">
               <label className="filter-label">Sort By</label>

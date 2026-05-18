@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./AdminGlobal.css";
+import API from "../api/axios";
 
 function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -20,7 +20,7 @@ function AdminOrders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/orders/admin/all");
+      const res = await API.get("/api/orders/admin/all");
 
       setOrders(res.data);
       setLoading(false);

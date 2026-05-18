@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState ,useCallback} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 // Global CSS import
 import "./AdminGlobal.css";
+import API from "../api/axios";
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -17,32 +17,43 @@ function Users() {
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 6;
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+ const fetchUsers = useCallback(async () => {
+  try {
+    setLoading(true);
 
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const token = localStorage.getItem("token");
 
-      const data = res.data || [];
-      setUsers(data);
-      setFilteredUsers(data);
+    const res = await API.get("/api/users", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      const totalPagesCalculated = Math.ceil(data.length / usersPerPage);
-      if (currentPage > totalPagesCalculated && totalPagesCalculated > 0) {
-        setCurrentPage(totalPagesCalculated);
-      }
-    } catch (error) {
-      console.log("Error fetching users:", error);
-    } finally {
-      setLoading(false);
+    const data = res.data || [];
+
+    setUsers(data);
+    setFilteredUsers(data);
+
+    const totalPagesCalculated = Math.ceil(
+      data.length / usersPerPage,
+    );
+
+    if (
+      currentPage > totalPagesCalculated &&
+      totalPagesCalculated > 0
+    ) {
+      setCurrentPage(totalPagesCalculated);
     }
-  };
+  } catch (error) {
+    console.log("Error fetching users:", error);
+  } finally {
+    setLoading(false);
+  }
+}, [currentPage]);
+
+useEffect(() => {
+  fetchUsers();
+}, [fetchUsers]);
 
   const handleSearch = (value) => {
     setSearch(value);
@@ -78,7 +89,7 @@ function Users() {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.delete(`http://localhost:5000/api/users/${id}`, {
+      await API.delete(`/api/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       Swal.fire({
@@ -96,8 +107,8 @@ function Users() {
   const toggleStatus = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(
-        `http://localhost:5000/api/users/toggle-status/${id}`,
+      await API.put(
+        `/api/users/toggle-status/${id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } },
       );
