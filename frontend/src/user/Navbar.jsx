@@ -109,7 +109,7 @@ function Navbar() {
             </Link>
 
             {/* WISHLIST */}
-            <Link to="/wishlist" className="cart-btn">
+            <Link to="/wishlist" className="cart-btn wishlist-btn" >
               <i className="bi bi-heart-fill"></i>
               Wishlist
             </Link>
