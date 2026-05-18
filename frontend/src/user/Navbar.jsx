@@ -211,15 +211,10 @@ function Navbar() {
             My Orders
           </Link>
 
-          <Link
-            to="/wishlist"
-            className="offcanvas-item"
-            onClick={() => setShowMenu(false)}
-          >
-            <i className="bi bi-heart-fill"></i>
-
-            Wishlist
-          </Link>
+          <Link to="/wishlist" className="cart-btn wishlist-btn">
+  <i className="bi bi-heart-fill"></i>
+  <span>Wishlist</span>
+</Link>
 
           <Link
             to="/cart"
