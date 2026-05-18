@@ -20,9 +20,7 @@ function Navbar() {
 
       if (!user) return;
 
-      const res = await API.get(
-        `/api/cart/${user._id}`
-      );
+      const res = await API.get(`/api/cart/${user._id}`);
 
       const count = res.data?.items?.length || 0;
 
@@ -111,7 +109,7 @@ function Navbar() {
             </Link>
 
             {/* WISHLIST */}
-            <Link to="/wishlist" className="cart-btn wishlist-btn">
+            <Link to="/wishlist" className="cart-btn">
               <i className="bi bi-heart-fill"></i>
               Wishlist
             </Link>
@@ -119,9 +117,7 @@ function Navbar() {
             <div className="desktop-menu">
               <Link to="/cart" className="cart-btn">
                 <i className="bi bi-cart3"></i>
-
                 Cart
-
                 <span className="cart-badge">{cartCount}</span>
               </Link>
 
@@ -133,10 +129,7 @@ function Navbar() {
 
             {/* SETTINGS BUTTON */}
 
-            <button
-              className="settings-btn"
-              onClick={() => setShowMenu(true)}
-            >
+            <button className="settings-btn" onClick={() => setShowMenu(true)}>
               <i className="bi bi-list"></i>
             </button>
           </div>
@@ -159,17 +152,13 @@ function Navbar() {
           <div>
             <h4>
               <i className="bi bi-gear-fill me-2"></i>
-
               Settings
             </h4>
 
             <p>Manage your account</p>
           </div>
 
-          <button
-            className="close-btn"
-            onClick={() => setShowMenu(false)}
-          >
+          <button className="close-btn" onClick={() => setShowMenu(false)}>
             <i className="bi bi-x-lg"></i>
           </button>
         </div>
@@ -197,7 +186,6 @@ function Navbar() {
             onClick={() => setShowMenu(false)}
           >
             <i className="bi bi-person-circle"></i>
-
             My Profile
           </Link>
 
@@ -207,14 +195,17 @@ function Navbar() {
             onClick={() => setShowMenu(false)}
           >
             <i className="bi bi-bag-check-fill"></i>
-
             My Orders
           </Link>
 
-          <Link to="/wishlist" className="cart-btn wishlist-btn">
-  <i className="bi bi-heart-fill"></i>
-  <span>Wishlist</span>
-</Link>
+          <Link
+            to="/wishlist"
+            className="offcanvas-item"
+            onClick={() => setShowMenu(false)}
+          >
+            <i className="bi bi-heart-fill"></i>
+            Wishlist
+          </Link>
 
           <Link
             to="/cart"
@@ -222,18 +213,12 @@ function Navbar() {
             onClick={() => setShowMenu(false)}
           >
             <i className="bi bi-cart-fill"></i>
-
             Shopping Cart
-
             <span className="inside-cart-count">{cartCount}</span>
           </Link>
 
-          <button
-            onClick={handleLogout}
-            className="offcanvas-item logout-item"
-          >
+          <button onClick={handleLogout} className="offcanvas-item logout-item">
             <i className="bi bi-box-arrow-right"></i>
-
             Logout
           </button>
         </div>
@@ -743,13 +728,10 @@ function Navbar() {
             display: none;
           }
 
-          .wishlist-btn {
-            padding: 10px 14px;
-          }
+            .wishlist-btn {
+    display: none;
+  }
 
-          .wishlist-btn span {
-            display: none;
-          }
         }
 
         @media (max-width: 600px) {
