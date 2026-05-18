@@ -4,7 +4,7 @@ const API = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
 });
 
-// 🔐 AUTO TOKEN ATTACH (VERY IMPORTANT)
+// 🔐 Auto attach token
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
 
