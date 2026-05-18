@@ -458,11 +458,11 @@ function Footer() {
               </p>
 
               <div className="footer-socials">
-                <a href="#" aria-label="Instagram"><i className="bi bi-instagram"></i></a>
-                <a href="#" aria-label="Facebook"><i className="bi bi-facebook"></i></a>
-                <a href="#" aria-label="Twitter"><i className="bi bi-twitter-x"></i></a>
-                <a href="#" aria-label="YouTube"><i className="bi bi-youtube"></i></a>
-                <a href="#" aria-label="Pinterest"><i className="bi bi-pinterest"></i></a>
+                <a href="https://www.instagram.com/" aria-label="Instagram"><i className="bi bi-instagram"></i></a>
+                <a href="https://www.facebook.com/" aria-label="Facebook"><i className="bi bi-facebook"></i></a>
+                <a href="https://x.com/" aria-label="Twitter"><i className="bi bi-twitter-x"></i></a>
+                <a href="https://www.youtube.com/" aria-label="YouTube"><i className="bi bi-youtube"></i></a>
+                <a href="https://www.pinterest.com/" aria-label="Pinterest"><i className="bi bi-pinterest"></i></a>
               </div>
             </div>
 
@@ -470,11 +470,11 @@ function Footer() {
             <div className="col-lg-2 col-md-3 col-6">
               <h5 className="footer-title">Shop</h5>
               <ul className="footer-links-list">
-                <li><a href="#">Men Watches</a></li>
-                <li><a href="#">Women Watches</a></li>
-                <li><a href="#">New Arrivals</a></li>
-                <li><a href="#">Best Sellers</a></li>
-                <li><a href="#">Limited Edition</a></li>
+                <li><a href="/all-products">Men Watches</a></li>
+                <li><a href="/all-products">Women Watches</a></li>
+                <li><a href="/all-products">New Arrivals</a></li>
+                <li><a href="/all-products">Best Sellers</a></li>
+                <li><a href="/all-products">Limited Edition</a></li>
               </ul>
             </div>
 
@@ -482,11 +482,11 @@ function Footer() {
             <div className="col-lg-2 col-md-3 col-6">
               <h5 className="footer-title">Support</h5>
               <ul className="footer-links-list">
-                <li><a href="#">Contact Us</a></li>
-                <li><a href="#">Track Order</a></li>
-                <li><a href="#">Returns</a></li>
-                <li><a href="#">FAQ</a></li>
-                <li><a href="#">Size Guide</a></li>
+                <li><a href="/contact">Contact Us</a></li>
+                <li><a href="/track-order">Track Order</a></li>
+                <li><a href="/returns">Returns</a></li>
+                <li><a href="/faq">FAQ</a></li>
+                <li><a href="/size-guide">Size Guide</a></li>
               </ul>
             </div>
 
@@ -530,9 +530,9 @@ function Footer() {
             <p>&copy; 2026 <span>Luxe Watch</span>. All rights reserved.</p>
             
             <div className="footer-bottom-links">
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
-              <a href="#">Cookie Policy</a>
+              <a href="/privacy-policy">Privacy Policy</a>
+              <a href="/terms-of-service">Terms of Service</a>
+              <a href="/cookie-policy">Cookie Policy</a>
             </div>
 
             <div className="footer-payments">
