@@ -21,7 +21,7 @@ const protect = (req, res, next) => {
   }
 };
 
-// ✅ ADMIN CHECK (MISSING THA TUMHARE CODE ME)
+// ✅ ADMIN CHECK
 const adminOnly = (req, res, next) => {
   try {
     if (!req.user || req.user.role !== "admin") {

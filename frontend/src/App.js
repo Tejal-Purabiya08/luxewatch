@@ -32,6 +32,7 @@ import AdminProductDetails from "./admin/AdminProductDetails";
 import UserDetails from "./admin/UserDetails ";
 import TrackOrder from "./user/TrackOrder";
 import Wishlist from "./user/Wishlist";
+import ForgotPassword from "./user/ForgotPassword";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
         {/* ================= PUBLIC ================= */}
         <Route path="/" element={<UserLogin />} />
         <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />}/>
 
         {/* ================= USER LAYOUT (Navbar + Footer FIX) ================= */}
         <Route element={<UserLayout />}>

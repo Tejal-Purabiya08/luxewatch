@@ -1,12 +1,22 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 const User = require("../model/userModel");
 
 const { protect, adminOnly } = require("../middleware/authMiddleware");
 
 const router = express.Router();
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 // ================= REGISTER =================
 
@@ -66,7 +76,7 @@ router.post("/login", async (req, res) => {
 
     if (user.status === "inactive") {
       return res.status(403).json({
-        message: "Your account is inactive. Contact admin.",
+        message: "Your account is inactive.",
       });
     }
 
@@ -100,6 +110,114 @@ router.post("/login", async (req, res) => {
     res.status(500).json({
       message: error.message,
     });
+  }
+});
+
+// ================= FORGOT PASSWORD =================
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    }
+
+    // GENERATE OTP
+    const otp = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
+    // SAVE OTP
+    user.otp = otp;
+
+    user.otpExpire = Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    // SEND EMAIL
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+
+      to: user.email,
+
+      subject: "Password Reset OTP",
+
+      text: `Your OTP is ${otp}`,
+    });
+
+    res.json({
+      message: "OTP sent to email",
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: error.message,
+    });
+
+  }
+});
+
+// ================= RESET PASSWORD =================
+
+router.post("/reset-password", async (req, res) => {
+
+  try {
+
+    const { email, otp, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    }
+
+    // CHECK OTP
+    if (user.otp !== otp) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    // CHECK OTP EXPIRE
+    if (user.otpExpire < Date.now()) {
+      return res.status(400).json({
+        message: "OTP expired",
+      });
+    }
+
+    // HASH PASSWORD
+    const hashedPassword = await bcrypt.hash(
+      newPassword,
+      10
+    );
+
+    user.password = hashedPassword;
+
+    // CLEAR OTP
+    user.otp = null;
+    user.otpExpire = null;
+
+    await user.save();
+
+    res.json({
+      message: "Password reset successful",
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: error.message,
+    });
+
   }
 });
 
