@@ -20,6 +20,10 @@ import Orders from "./user/Orders";
 import UserProfile from "./user/UserProfile";
 import AllProducts from "./user/AllProducts";
 import UserPrivate from "./user/UserPrivate";
+import Contact from "./user/Contact";
+import FAQ from "./user/FAQ";
+import Returns from "./user/Returns";
+import ShippingPolicy from "./user/ShippingPolicy";
 
 // ADMIN PAGES
 import Dashboard from "./admin/Dashboard";
@@ -56,6 +60,10 @@ function App() {
           <Route path="/user-profile" element={<UserPrivate><UserProfile /></UserPrivate>} />
           <Route path="/track/:id" element={<UserPrivate><TrackOrder /></UserPrivate>} />
           <Route path="/wishlist"element={<UserPrivate><Wishlist /></UserPrivate>}/>
+          <Route path="/contact" element={<UserPrivate><Contact /></UserPrivate>} />
+          <Route path="/faq" element={<UserPrivate><FAQ /></UserPrivate>} />
+          <Route path="/returns" element={<UserPrivate><Returns /></UserPrivate>} />
+          <Route path="/shipping-policy" element={<UserPrivate><ShippingPolicy /></UserPrivate>} />
         </Route>
 
         {/* ================= ADMIN ================= */}

@@ -344,7 +344,7 @@ function Cart() {
 
                   {/* PROMO INPUT BOX */}
                   <div className="coupon-wrapper mb-4 text-start">
-                    <label className="form-label small text-muted fw-semibold mb-2" style={{ color: 'rgba(255,255,255,0.6) !important' }}>
+                    <label className="form-label subtitle small text-muted fw-semibold mb-2" style={{ color: 'rgba(255,255,255,0.6) !important' }}>
                       Have a Promo Code?
                     </label>
                     <div className="input-group custom-coupon-group">
@@ -386,21 +386,21 @@ function Cart() {
                   {/* COMPUTED PRICES SUMMARY */}
                   <div className="summary-details text-start">
                     <div className="d-flex justify-content-between mb-2.5">
-                      <span className="text-muted small">Subtotal</span>
+                      <span className="text-muted small subtitle">Subtotal</span>
                       <span className="fw-medium text-white">
                         ${totalPrice.toLocaleString()}
                       </span>
                     </div>
 
                     {discount > 0 && (
-                      <div className="d-flex justify-content-between mb-2.5 text-success small fw-medium">
-                        <span>Discount</span>
+                      <div className="d-flex  justify-content-between mb-2.5 text-success small fw-medium">
+                        <span className="subtitle">Discount</span>
                         <span>- ${(discount).toLocaleString()}</span>
                       </div>
                     )}
 
                     <div className="d-flex justify-content-between mb-2.5">
-                      <span className="text-muted small">GST (18%)</span>
+                      <span className="text-muted small subtitle">GST (18%)</span>
                       <span className="fw-medium text-white">
                         ${gst.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       </span>

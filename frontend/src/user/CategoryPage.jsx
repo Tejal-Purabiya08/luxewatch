@@ -283,7 +283,7 @@ function CategoryPage() {
             <div className="col-lg-3 col-md-12">
               <div className="d-flex justify-content-between filter-label mb-1">
                 <span>Max Price:</span>
-                <span className="text-gold">${priceRange.toLocaleString()}</span>
+                <span className="text-gold">₹{priceRange.toLocaleString()}</span>
               </div>
               <input
                 type="range"

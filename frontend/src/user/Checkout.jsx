@@ -11,7 +11,7 @@ function Checkout() {
   const finalTotal = location.state?.finalTotal || 0;
 
   const user = JSON.parse(localStorage.getItem("user"));
-const userId = user?._id;
+  const userId = user?._id;
 
   const [paymentMethod, setPaymentMethod] = useState("RAZORPAY");
 
@@ -21,24 +21,26 @@ const userId = user?._id;
     phone: "",
     city: "",
     address: "",
+    state: "",
   });
 
-useEffect(() => {
-  if (!userId) {
-    navigate("/");
-    return;
-  }
+  useEffect(() => {
+    if (!userId) {
+      navigate("/");
+      return;
+    }
 
-  setForm({
-    name: user?.name || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    city: user?.city || "",
-    address: user?.address || "",
-  });
+    setForm({
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      city: user?.city || "",
+      address: user?.address || "",
+      state: user?.state || "",
+    });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [userId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   // FORM CHANGE + PHONE LIMIT
   const handleChange = (e) => {
@@ -74,7 +76,7 @@ useEffect(() => {
         return Swal.fire(
           "Error",
           "Phone number must be exactly 10 digits",
-          "error"
+          "error",
         );
       }
 
@@ -96,7 +98,7 @@ useEffect(() => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       localStorage.setItem("user", JSON.stringify(updatedUserRes.data));
@@ -219,7 +221,7 @@ useEffect(() => {
       Swal.fire(
         "Error",
         err.response?.data?.message || "Something went wrong",
-        "error"
+        "error",
       );
     }
   };
@@ -235,18 +237,26 @@ useEffect(() => {
         <div className="floating-orb orb-1"></div>
         <div className="floating-orb orb-2"></div>
 
-        <div className="container py-5 mt-4 position-relative" style={{ zIndex: 2 }}>
-          
+        <div
+          className="container py-5 mt-4 position-relative"
+          style={{ zIndex: 2 }}
+        >
           {/* ================= BREADCRUMB NAVIGATION ================= */}
           <nav aria-label="breadcrumb" className="mb-4">
             <ol className="breadcrumb custom-checkout-breadcrumb">
               <li className="breadcrumb-item">
-                <button className="btn-breadcrumb-link" onClick={() => navigate("/home")}>
+                <button
+                  className="btn-breadcrumb-link"
+                  onClick={() => navigate("/home")}
+                >
                   Home
                 </button>
               </li>
               <li className="breadcrumb-item">
-                <button className="btn-breadcrumb-link" onClick={() => navigate("/cart")}>
+                <button
+                  className="btn-breadcrumb-link"
+                  onClick={() => navigate("/cart")}
+                >
                   Shopping Cart
                 </button>
               </li>
@@ -258,9 +268,7 @@ useEffect(() => {
 
           <div className="row justify-content-center">
             <div className="col-lg-8 col-md-10 col-12">
-              
               <div className="checkout-card-premium shadow-sm p-4 p-md-5 border rounded-4">
-                
                 {/* Header */}
                 <div className="mb-5">
                   <span className="section-badge">Secure Protocol</span>
@@ -268,7 +276,8 @@ useEffect(() => {
                     Secure <span className="text-gold">Checkout</span>
                   </h1>
                   <p className="text-muted subtitle mb-3">
-                    Verify your delivery details and choose your preferred payment architecture.
+                    Verify your delivery details and choose your preferred
+                    payment architecture.
                   </p>
                   <div className="divider-line"></div>
                 </div>
@@ -276,64 +285,121 @@ useEffect(() => {
                 {/* Section 1: Shipping */}
                 <div className="section-header-custom mb-4">
                   <span className="step-badge-custom">1</span>
-                  <h5 className="m-0 fw-bold text-white font-playfair">Shipping & Delivery Details</h5>
+                  <h5 className="m-0 fw-bold text-white font-playfair">
+                    Shipping & Delivery Details
+                  </h5>
                 </div>
 
                 <div className="row g-3 mb-5">
                   <div className="col-12">
                     <label className="form-custom-label">Full Name</label>
-                    <input name="name" value={form.name} onChange={handleChange} className="modern-input-field" placeholder="Enter full name" />
-                  </div>
-                  <div className="col-12">
-                    <label className="form-custom-label">Email Address</label>
-                    <input name="email" value={form.email} onChange={handleChange} className="modern-input-field" placeholder="name@example.com" />
+                    <input
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      className="modern-input-field"
+                      placeholder="Enter full name"
+                    />
                   </div>
                   <div className="col-md-7 col-12">
-                    <label className="form-custom-label">Phone Number</label>
-                    <input name="phone" value={form.phone} onChange={handleChange} className="modern-input-field" placeholder="10-digit number" />
+                    <label className="form-custom-label">Email Address</label>
+                    <input
+                      name="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      className="modern-input-field"
+                      placeholder="name@example.com"
+                    />
                   </div>
                   <div className="col-md-5 col-12">
+                    <label className="form-custom-label">Phone Number</label>
+                    <input
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      className="modern-input-field"
+                      placeholder="10-digit number"
+                    />
+                  </div>
+                  <div className="col-md-6 col-12">
                     <label className="form-custom-label">City</label>
-                    <input name="city" value={form.city} onChange={handleChange} className="modern-input-field" placeholder="e.g. Ahmedabad" />
+                    <input
+                      name="city"
+                      value={form.city}
+                      onChange={handleChange}
+                      className="modern-input-field"
+                      placeholder="e.g. Ahmedabad"
+                    />
+                  </div>
+                  <div className="col-md-6 col-12">
+                    <label className="form-custom-label">State</label>
+
+                    <input
+                      name="state"
+                      value={form.state}
+                      onChange={handleChange}
+                      className="modern-input-field"
+                      placeholder="e.g. Gujarat"
+                    />
                   </div>
                   <div className="col-12">
                     <label className="form-custom-label">Full Address</label>
-                    <textarea name="address" value={form.address} onChange={handleChange} className="modern-input-field textarea" rows="3" placeholder="House no, Street name, Landmark, Pincode" />
+                    <textarea
+                      name="address"
+                      value={form.address}
+                      onChange={handleChange}
+                      className="modern-input-field textarea"
+                      rows="3"
+                      placeholder="House no, Street name, Landmark, Pincode"
+                    />
                   </div>
                 </div>
 
                 {/* Section 2: Payment */}
                 <div className="section-header-custom mb-4">
                   <span className="step-badge-custom">2</span>
-                  <h5 className="m-0 fw-bold text-white font-playfair">Select Payment Method</h5>
+                  <h5 className="m-0 fw-bold text-white font-playfair">
+                    Select Payment Method
+                  </h5>
                 </div>
 
                 <div className="payment-toggle-grid-custom mb-5">
-                  <div 
-                    className={`payment-method-box-custom ${paymentMethod === "RAZORPAY" ? "active" : ""}`} 
+                  <div
+                    className={`payment-method-box-custom ${paymentMethod === "RAZORPAY" ? "active" : ""}`}
                     onClick={() => setPaymentMethod("RAZORPAY")}
                   >
                     <div className="inner-circle-indicator"></div>
                     <div className="text-start">
-                      <span className="d-block fw-bold small text-white">Online Gateway</span>
-                      <small className="text-white-50 extra-small">Cards, UPI, Netbanking, Wallets</small>
+                      <span className="d-block fw-bold small text-white">
+                        Online Gateway
+                      </span>
+                      <small className="text-white-50 extra-small">
+                        Cards, UPI, Netbanking, Wallets
+                      </small>
                     </div>
                   </div>
 
-                  <div 
-                    className={`payment-method-box-custom ${paymentMethod === "COD" ? "active" : ""}`} 
+                  <div
+                    className={`payment-method-box-custom ${paymentMethod === "COD" ? "active" : ""}`}
                     onClick={() => setPaymentMethod("COD")}
                   >
                     <div className="inner-circle-indicator"></div>
                     <div className="text-start">
-                      <span className="d-block fw-bold small text-white">Cash on Delivery</span>
-                      <small className="text-white-50 extra-small">Pay with physical cash upon arrival</small>
+                      <span className="d-block fw-bold small text-white">
+                        Cash on Delivery
+                      </span>
+                      <small className="text-white-50 extra-small">
+                        Pay with physical cash upon arrival
+                      </small>
                     </div>
                   </div>
                 </div>
 
                 {/* Submit Action Button */}
-                <button className="main-submit-action-btn shadow-sm py-3" onClick={payNow}>
+                <button
+                  className="main-submit-action-btn shadow-sm py-3"
+                  onClick={payNow}
+                >
                   {paymentMethod === "COD" ? (
                     <span>Confirm Order (COD)</span>
                   ) : (
@@ -346,9 +412,7 @@ useEffect(() => {
                     🔒 Secured with 256-Bit SSL Encrypted Framework
                   </span>
                 </div>
-
               </div>
-
             </div>
           </div>
         </div>

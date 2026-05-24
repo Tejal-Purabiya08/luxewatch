@@ -22,8 +22,10 @@ const transporter = nodemailer.createTransport({
 
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, phone, city, state, address } =
+      req.body;
 
+    // CHECK USER
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -32,18 +34,44 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    // PASSWORD VALIDATION
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
+      });
+    }
+
+    // HASH PASSWORD
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // CREATE USER
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
+
       role: role || "user",
+
+      phone,
+      city,
+      state,
+      address,
     });
 
+    // SAFE RESPONSE
     res.status(201).json({
       message: "User Registered",
-      user,
+
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        city: user.city,
+        state: user.state,
+        address: user.address,
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -117,7 +145,6 @@ router.post("/login", async (req, res) => {
 
 router.post("/forgot-password", async (req, res) => {
   try {
-
     const { email } = req.body;
 
     const user = await User.findOne({ email });
@@ -129,13 +156,15 @@ router.post("/forgot-password", async (req, res) => {
     }
 
     // GENERATE OTP
-    const otp = Math.floor(
-      100000 + Math.random() * 900000
-    ).toString();
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // SAVE OTP
-    user.otp = otp;
+    // HASH OTP
+    const hashedOtp = await bcrypt.hash(otp, 10);
 
+    // SAVE HASHED OTP
+    user.otp = hashedOtp;
+
+    // OTP EXPIRE TIME (10 MINUTES)
     user.otpExpire = Date.now() + 10 * 60 * 1000;
 
     await user.save();
@@ -148,28 +177,68 @@ router.post("/forgot-password", async (req, res) => {
 
       subject: "Password Reset OTP",
 
-      text: `Your OTP is ${otp}`,
+      html: `
+          <div style="
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+          ">
+            <div style="
+              max-width: 500px;
+              margin: auto;
+              background: white;
+              padding: 30px;
+              border-radius: 10px;
+              text-align: center;
+            ">
+              <h2 style="color:#333;">
+                Password Reset Request
+              </h2>
+
+              <p style="font-size:16px;color:#555;">
+                Use the OTP below to reset your password:
+              </p>
+
+              <h1 style="
+                letter-spacing: 8px;
+                color: #c9a962;
+                margin: 30px 0;
+              ">
+                ${otp}
+              </h1>
+
+              <p style="color:#777;">
+                This OTP will expire in
+                <b>10 minutes</b>.
+              </p>
+
+              <p style="
+                margin-top:30px;
+                font-size:13px;
+                color:#999;
+              ">
+                If you did not request this,
+                please ignore this email.
+              </p>
+            </div>
+          </div>
+        `,
     });
 
     res.json({
       message: "OTP sent to email",
     });
-
   } catch (error) {
-
     res.status(500).json({
       message: error.message,
     });
-
   }
 });
 
 // ================= RESET PASSWORD =================
 
 router.post("/reset-password", async (req, res) => {
-
   try {
-
     const { email, otp, newPassword } = req.body;
 
     const user = await User.findOne({ email });
@@ -180,25 +249,38 @@ router.post("/reset-password", async (req, res) => {
       });
     }
 
-    // CHECK OTP
-    if (user.otp !== otp) {
+    // OTP FORMAT CHECK
+    if (otp.length !== 6) {
       return res.status(400).json({
-        message: "Invalid OTP",
+        message: "Invalid OTP format",
+      });
+    }
+
+    // PASSWORD VALIDATION
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
       });
     }
 
     // CHECK OTP EXPIRE
-    if (user.otpExpire < Date.now()) {
+    if (!user.otpExpire || user.otpExpire < Date.now()) {
       return res.status(400).json({
         message: "OTP expired",
       });
     }
 
-    // HASH PASSWORD
-    const hashedPassword = await bcrypt.hash(
-      newPassword,
-      10
-    );
+    // VERIFY HASHED OTP
+    const isOtpValid = await bcrypt.compare(otp, user.otp);
+
+    if (!isOtpValid) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    // HASH NEW PASSWORD
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     user.password = hashedPassword;
 
@@ -211,13 +293,10 @@ router.post("/reset-password", async (req, res) => {
     res.json({
       message: "Password reset successful",
     });
-
   } catch (error) {
-
     res.status(500).json({
       message: error.message,
     });
-
   }
 });
 
@@ -230,26 +309,6 @@ router.get("/", protect, adminOnly, async (req, res) => {
     }).select("-password");
 
     res.json(users);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-});
-
-// ================= GET SINGLE USER =================
-
-router.get("/:id", protect, adminOnly, async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).select("-password");
-
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-
-    res.json(user);
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -277,11 +336,12 @@ router.put("/:id", protect, async (req, res) => {
           email: req.body.email,
           phone: req.body.phone,
           city: req.body.city,
+          state: req.body.state,
           address: req.body.address,
         },
       },
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     ).select("-password");
@@ -295,7 +355,6 @@ router.put("/:id", protect, async (req, res) => {
 });
 
 // ================= DELETE USER =================
-
 router.delete("/:id", protect, adminOnly, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -323,6 +382,26 @@ router.delete("/:id", protect, adminOnly, async (req, res) => {
 router.get("/profile/me", protect, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+});
+
+// ================= GET SINGLE USER =================
+
+router.get("/:id", protect, adminOnly, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
 
     if (!user) {
       return res.status(404).json({

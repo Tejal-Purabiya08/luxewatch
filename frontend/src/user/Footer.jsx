@@ -61,6 +61,7 @@ function Footer() {
           padding-right: 40px;
         }
 
+        /* Unique Design for Footer Logo */
         .footer-logo {
           font-family: 'Playfair Display', serif;
           font-size: 1.8rem;
@@ -73,9 +74,9 @@ function Footer() {
           gap: 12px;
         }
 
-        .footer-logo-icon {
-          width: 40px;
-          height: 40px;
+        .footer-logo-box {
+          width: 42px;
+          height: 42px;
           background: linear-gradient(135deg, #c9a962 0%, #e8d5a3 50%, #c9a962 100%);
           border-radius: 50%;
           display: flex;
@@ -83,6 +84,7 @@ function Footer() {
           justify-content: center;
           font-size: 18px;
           color: #0a0c1a;
+          box-shadow: 0 4px 15px rgba(201, 169, 98, 0.2);
         }
 
         .footer-logo span {
@@ -193,40 +195,6 @@ function Footer() {
 
         .footer-links-list li a:hover::before {
           width: 12px;
-        }
-
-        /* Contact Info */
-        .footer-contact-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 14px;
-          margin-bottom: 18px;
-        }
-
-        .footer-contact-icon {
-          width: 36px;
-          height: 36px;
-          background: rgba(201, 169, 98, 0.1);
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #c9a962;
-          font-size: 14px;
-          flex-shrink: 0;
-        }
-
-        .footer-contact-text {
-          font-size: 14px;
-          color: #a1a1aa;
-          line-height: 1.5;
-        }
-
-        .footer-contact-text strong {
-          display: block;
-          color: #ffffff;
-          font-weight: 500;
-          margin-bottom: 2px;
         }
 
         /* Newsletter Section */
@@ -437,32 +405,41 @@ function Footer() {
 
       {/* ================= FOOTER ================= */}
       <footer className="premium-footer">
-        {/* Decorative Elements */}
         <div className="footer-decoration footer-decoration-1"></div>
         <div className="footer-decoration footer-decoration-2"></div>
 
         <div className="container py-5 footer-content">
           <div className="row g-4 g-lg-5">
-
             {/* BRAND */}
             <div className="col-lg-4 col-md-6 footer-brand-section">
               <h3 className="footer-logo">
-                <div className="footer-logo-icon">
+                <div className="footer-logo-box">
                   <i className="bi bi-watch"></i>
                 </div>
                 <span>LUXE WATCH</span>
               </h3>
               <p className="footer-tagline">Since 1985</p>
               <p className="footer-text">
-                Timeless elegance crafted for modern lifestyles. Every timepiece tells a story of precision, luxury, and uncompromising quality.
+                Timeless elegance crafted for modern lifestyles. Every timepiece
+                tells a story of precision, luxury, and uncompromising quality.
               </p>
 
               <div className="footer-socials">
-                <a href="https://www.instagram.com/" aria-label="Instagram"><i className="bi bi-instagram"></i></a>
-                <a href="https://www.facebook.com/" aria-label="Facebook"><i className="bi bi-facebook"></i></a>
-                <a href="https://x.com/" aria-label="Twitter"><i className="bi bi-twitter-x"></i></a>
-                <a href="https://www.youtube.com/" aria-label="YouTube"><i className="bi bi-youtube"></i></a>
-                <a href="https://www.pinterest.com/" aria-label="Pinterest"><i className="bi bi-pinterest"></i></a>
+                <a href="https://www.instagram.com/" aria-label="Instagram">
+                  <i className="bi bi-instagram"></i>
+                </a>
+                <a href="https://www.facebook.com/" aria-label="Facebook">
+                  <i className="bi bi-facebook"></i>
+                </a>
+                <a href="https://x.com/" aria-label="Twitter">
+                  <i className="bi bi-twitter-x"></i>
+                </a>
+                <a href="https://www.youtube.com/" aria-label="YouTube">
+                  <i className="bi bi-youtube"></i>
+                </a>
+                <a href="https://www.pinterest.com/" aria-label="Pinterest">
+                  <i className="bi bi-pinterest"></i>
+                </a>
               </div>
             </div>
 
@@ -470,11 +447,12 @@ function Footer() {
             <div className="col-lg-2 col-md-3 col-6">
               <h5 className="footer-title">Shop</h5>
               <ul className="footer-links-list">
-                <li><a href="/all-products">Men Watches</a></li>
-                <li><a href="/all-products">Women Watches</a></li>
-                <li><a href="/all-products">New Arrivals</a></li>
-                <li><a href="/all-products">Best Sellers</a></li>
-                <li><a href="/all-products">Limited Edition</a></li>
+                <li><a href="/category/Men">Men Watches</a></li>
+                <li><a href="/category/Women">Women Watches</a></li>
+                <li><a href="/category/Daniel%20Wellington">Daniel Wellington</a></li>
+                <li><a href="/category/Casio">Casio</a></li>
+                <li><a href="/category/Maserati">Maserati</a></li>
+                <li><a href="/category/Tommy%20Hilfiger">Tommy Hilfiger</a></li>
               </ul>
             </div>
 
@@ -483,10 +461,9 @@ function Footer() {
               <h5 className="footer-title">Support</h5>
               <ul className="footer-links-list">
                 <li><a href="/contact">Contact Us</a></li>
-                <li><a href="/track-order">Track Order</a></li>
-                <li><a href="/returns">Returns</a></li>
                 <li><a href="/faq">FAQ</a></li>
-                <li><a href="/size-guide">Size Guide</a></li>
+                <li><a href="/returns">Returns & Refunds</a></li>
+                <li><a href="/shipping-policy">Shipping Policy</a></li>
               </ul>
             </div>
 
@@ -495,7 +472,8 @@ function Footer() {
               <div className="footer-newsletter">
                 <h5 className="footer-title">Stay Updated</h5>
                 <p className="footer-newsletter-text">
-                  Subscribe to receive exclusive offers, early access to new collections, and luxury lifestyle updates.
+                  Subscribe to receive exclusive offers, early access to new
+                  collections, and luxury lifestyle updates.
                 </p>
                 <div className="footer-input-group">
                   <input
@@ -506,35 +484,23 @@ function Footer() {
                   <button className="footer-btn">Subscribe</button>
                 </div>
                 <div className="footer-badges">
-                  <span className="footer-badge">
-                    <i className="bi bi-shield-check"></i>
-                    Secure
-                  </span>
-                  <span className="footer-badge">
-                    <i className="bi bi-envelope-check"></i>
-                    No Spam
-                  </span>
-                  <span className="footer-badge">
-                    <i className="bi bi-gift"></i>
-                    Exclusive Deals
-                  </span>
+                  <span className="footer-badge"><i className="bi bi-shield-check"></i> Secure</span>
+                  <span className="footer-badge"><i className="bi bi-envelope-check"></i> No Spam</span>
+                  <span className="footer-badge"><i className="bi bi-gift"></i> Exclusive Deals</span>
                 </div>
               </div>
             </div>
-
           </div>
 
           <hr className="footer-divider" />
 
           <div className="footer-bottom">
             <p>&copy; 2026 <span>Luxe Watch</span>. All rights reserved.</p>
-            
             <div className="footer-bottom-links">
               <a href="/privacy-policy">Privacy Policy</a>
               <a href="/terms-of-service">Terms of Service</a>
               <a href="/cookie-policy">Cookie Policy</a>
             </div>
-
             <div className="footer-payments">
               <span>We Accept:</span>
               <div className="footer-payment-icons">

@@ -91,48 +91,36 @@ function Home() {
   };
 
   const addToWishlist = async (product) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
 
-  try {
+      if (!user) {
+        Swal.fire({
+          title: "Login Required",
+          text: "Please login first",
+          icon: "warning",
+          confirmButtonColor: "#c9a962",
+        });
 
-    const user = JSON.parse(
-      localStorage.getItem("user")
-    );
+        return;
+      }
 
-    if (!user) {
-
-      Swal.fire({
-        title: "Login Required",
-        text: "Please login first",
-        icon: "warning",
-        confirmButtonColor: "#c9a962",
+      await API.post("/api/wishlist/add", {
+        userId: user._id,
+        productId: product._id,
       });
 
-      return;
+      Swal.fire({
+        icon: "success",
+        title: "Added To Wishlist",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.log(err);
+      Swal.fire("Error", "Could not add to wishlist", "error");
     }
-
-    await API.post("/api/wishlist/add", {
-      userId: user._id,
-      productId: product._id,
-    });
-
-    Swal.fire({
-      icon: "success",
-      title: "Added To Wishlist",
-      timer: 1200,
-      showConfirmButton: false,
-    });
-
-  } catch (err) {
-
-    console.log(err);
-
-    Swal.fire(
-      "Error",
-      "Could not add to wishlist",
-      "error"
-    );
-  }
-};
+  };
 
   // MODAL HANDLERS
   const openModal = (product) => {
@@ -195,43 +183,50 @@ function Home() {
           <div className="accent-bar mx-auto"></div>
         </div>
 
-        {/* PRODUCTS GRID WITH STAGGERED ANIMATION */}
-        <div className="row products-grid-row">
+        {/* PRODUCTS GRID */}
+        <div className="row products-grid-row g-4">
           <AnimatePresence mode="popLayout">
-            {filtered.slice(0, visibleCount).map((item) => (
+            {filtered.slice(0, visibleCount).map((item, index) => (
               <motion.div
                 key={item._id}
                 layout
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="col-lg-3 col-md-6 mb-5 product-column"
+                transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="col-xl-3 col-lg-4 col-md-6 product-column"
               >
                 <div className="premium-card">
-                  {/* CARD IMAGE HOLDER (NOW FULL CARD WIDTH) */}
+                  {/* CARD IMAGE HOLDER */}
                   <div className="image-holder">
+                    <div className="image-glow"></div>
                     <img
-                      src={item.image}
-                      alt={item.name}
-                      onClick={() => navigate(`/category/${item.category[0]}`)}
-                      className="main-watch-img"
-                    />
+  src={item.image || "/placeholder.jpg"}
+  alt={item.name}
+  onClick={() => {
+    // Agar category array hai toh pehli select hogi, warna direct string
+    const targetCategory = Array.isArray(item.category) ? item.category[0] : item.category;
+    if (targetCategory) {
+      navigate(`/category/${encodeURIComponent(targetCategory)}`);
+    }
+  }}
+  className="main-watch-img"
+/>
 
-                    {/* INTERACTIVE FLOATING STRIP (UNTOUCHED AS REQUESTED) */}
+                    {/* INTERACTIVE FLOATING STRIP */}
                     <div className="icon-action-strip">
                       <button
-  className="action-circle"
-  title="Wishlist"
-  onClick={() => addToWishlist(item)}
->
-  <i className="bi bi-heart"></i>
-</button>
+                        className="action-circle"
+                        title="Wishlist"
+                        onClick={() => addToWishlist(item)}
+                      >
+                        <i className="bi bi-heart"></i>
+                      </button>
 
                       <button
                         className="action-circle gold-fill"
                         title="Add to Cart"
-                        onClick={() => addToCart(item)}
+                        onClick={() => addToCart(item, 1)}
                       >
                         <i className="bi bi-bag-plus"></i>
                       </button>
@@ -244,10 +239,13 @@ function Home() {
                         <i className="bi bi-eye"></i>
                       </button>
                     </div>
+
+                    {/* Badge */}
+                    <div className="card-badge">New</div>
                   </div>
 
-                  {/* PRODUCT METADATA (DESIGN MATCHED WITH PRODUCT DETAILS) */}
-                  <div className="card-info text-center pt-4 pb-3 px-3">
+                  {/* PRODUCT METADATA */}
+                  <div className="card-info text-center pt-4 pb-4 px-3">
                     <span className="brand-badge">{item.brand}</span>
                     <h5 className="product-title">{item.name}</h5>
                     <div className="price-divider"></div>
@@ -262,7 +260,6 @@ function Home() {
         </div>
 
         {/* LOAD MORE BUTTON */}
-
         <div className="text-center mt-4">
           <button
             className="load-more-btn"
@@ -339,7 +336,7 @@ function Home() {
 
                   {/* Action CTA Block */}
                   <div className="d-flex align-items-center gap-3 actions-btn-group">
-                     <button
+                    <button
                       className="btn-modal-secondary flex-grow-1"
                       onClick={() => addToWishlist(selectedProduct)}
                     >
@@ -360,77 +357,251 @@ function Home() {
       </AnimatePresence>
 
       {/* ================= WHY CHOOSE US PREMIUM SECTION ================= */}
-<div className="container my-5 py-5 trust-section-wrapper">
-  <div className="text-center mb-5 heading-section">
-    <h2 className="luxury-heading">
-      Why <span className="text-gold">Choose Us</span>
-    </h2>
-    <div className="accent-bar mx-auto"></div>
-    <p className="mt-3 section-subtitle">
-      Experience luxury shopping with trust, quality, and elegance.
-    </p>
-  </div>
+      <div className="container my-5 py-5 trust-section-wrapper">
+        <div className="text-center mb-5 heading-section">
+          <h2 className="luxury-heading">
+            Why <span className="text-gold">Choose Us</span>
+          </h2>
+          <div className="accent-bar mx-auto"></div>
+          <p className="mt-3 section-subtitle">
+            Experience luxury shopping with trust, quality, and elegance.
+          </p>
+        </div>
 
-  <div className="row g-4 justify-content-center">
-    {/* Card 1 */}
-    <div className="col-lg-3 col-md-6 col-sm-6">
-      <div className="trust-card">
-        <div className="trust-icon-wrapper">
-          <div className="trust-icon">
-            <i className="bi bi-truck"></i>
+        <div className="row g-4 justify-content-center">
+          {/* Card 1 */}
+          <div className="col-lg-3 col-md-6 col-sm-6">
+            <div className="trust-card">
+              <div className="trust-icon-wrapper">
+                <div className="trust-icon">
+                  <i className="bi bi-truck"></i>
+                </div>
+              </div>
+              <h5 className="trust-title">Free Delivery</h5>
+              <p className="trust-desc">Fast & secure shipping directly to your doorstep.</p>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="col-lg-3 col-md-6 col-sm-6">
+            <div className="trust-card">
+              <div className="trust-icon-wrapper">
+                <div className="trust-icon">
+                  <i className="bi bi-shield-check"></i>
+                </div>
+              </div>
+              <h5 className="trust-title">100% Authentic</h5>
+              <p className="trust-desc">Only original luxury timepieces guaranteed.</p>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="col-lg-3 col-md-6 col-sm-6">
+            <div className="trust-card">
+              <div className="trust-icon-wrapper">
+                <div className="trust-icon">
+                  <i className="bi bi-arrow-repeat"></i>
+                </div>
+              </div>
+              <h5 className="trust-title">Easy Returns</h5>
+              <p className="trust-desc">Hassle-free 7-day premium return policy.</p>
+            </div>
+          </div>
+
+          {/* Card 4 */}
+          <div className="col-lg-3 col-md-6 col-sm-6">
+            <div className="trust-card">
+              <div className="trust-icon-wrapper">
+                <div className="trust-icon">
+                  <i className="bi bi-headset"></i>
+                </div>
+              </div>
+              <h5 className="trust-title">24/7 Support</h5>
+              <p className="trust-desc">Dedicated concierge team always ready to help.</p>
+            </div>
           </div>
         </div>
-        <h5 className="trust-title">Free Delivery</h5>
-        <p className="trust-desc">Fast & secure shipping directly to your doorstep.</p>
       </div>
-    </div>
-
-    {/* Card 2 */}
-    <div className="col-lg-3 col-md-6 col-sm-6">
-      <div className="trust-card">
-        <div className="trust-icon-wrapper">
-          <div className="trust-icon">
-            <i className="bi bi-shield-check"></i>
-          </div>
-        </div>
-        <h5 className="trust-title">100% Authentic</h5>
-        <p className="trust-desc">Only original luxury timepieces guaranteed.</p>
-      </div>
-    </div>
-
-    {/* Card 3 */}
-    <div className="col-lg-3 col-md-6 col-sm-6">
-      <div className="trust-card">
-        <div className="trust-icon-wrapper">
-          <div className="trust-icon">
-            <i className="bi bi-arrow-repeat"></i>
-          </div>
-        </div>
-        <h5 className="trust-title">Easy Returns</h5>
-        <p className="trust-desc">Hassle-free 7-day premium return policy.</p>
-      </div>
-    </div>
-
-    {/* Card 4 */}
-    <div className="col-lg-3 col-md-6 col-sm-6">
-      <div className="trust-card">
-        <div className="trust-icon-wrapper">
-          <div className="trust-icon">
-            <i className="bi bi-headset"></i>
-          </div>
-        </div>
-        <h5 className="trust-title">24/7 Support</h5>
-        <p className="trust-desc">Dedicated concierge team always ready to help.</p>
-      </div>
-    </div>
-  </div>
-</div>
 
       {/* ================= SCOPED IN-COMPONENT CSS SYSTEM ================= */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
-        /* GLOBAL LAYOUT & NEW FONTS */
+        .premium-card {
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: 20px;
+          border: 1px solid rgba(201, 169, 98, 0.1);
+          overflow: hidden;
+          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+          backdrop-filter: blur(10px);
+        }
+
+        .premium-card:hover {
+          transform: translateY(-12px);
+          border-color: rgba(201, 169, 98, 0.3);
+          box-shadow: 
+            0 25px 50px rgba(0, 0, 0, 0.4),
+            0 0 40px rgba(201, 169, 98, 0.1);
+        }
+
+        .image-holder {
+          background: linear-gradient(180deg, rgba(201, 169, 98, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%);
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          aspect-ratio: 1 / 1;
+          padding: 20px;
+        }
+
+        .image-glow {
+          position: absolute;
+          width: 60%;
+          height: 60%;
+          background: radial-gradient(circle, rgba(201, 169, 98, 0.2) 0%, transparent 70%);
+          border-radius: 50%;
+          opacity: 0;
+          transition: opacity 0.5s ease;
+        }
+
+        .premium-card:hover .image-glow {
+          opacity: 1;
+        }
+
+        .main-watch-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 12px;
+          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+          cursor: pointer;
+          position: relative;
+          z-index: 1;
+        }
+
+        .premium-card:hover .main-watch-img {
+          transform: scale(1.08);
+        }
+
+        .icon-action-strip {
+          position: absolute;
+          bottom: -60px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          background: rgba(26, 26, 46, 0.95);
+          padding: 8px;
+          border-radius: 40px;
+          border: 1px solid rgba(201, 169, 98, 0.2);
+          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+          gap: 8px;
+          opacity: 0;
+          backdrop-filter: blur(10px);
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          z-index: 3;
+        }
+
+        .premium-card:hover .icon-action-strip {
+          bottom: 16px;
+          opacity: 1;
+        }
+
+        .action-circle {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          border: 1px solid rgba(201, 169, 98, 0.2);
+          background: rgba(255, 255, 255, 0.05);
+          color: rgba(255, 255, 255, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 16px;
+        }
+
+        .action-circle:hover {
+          background: rgba(201, 169, 98, 0.2);
+          border-color: #c9a962;
+          color: #c9a962;
+          transform: scale(1.1);
+        }
+
+        .action-circle.gold-fill {
+          background: linear-gradient(135deg, #c9a962 0%, #a88a4a 100%);
+          border: none;
+          color: #0a0a0f;
+        }
+
+        .action-circle.gold-fill:hover {
+          background: linear-gradient(135deg, #d4b46e 0%, #c9a962 100%);
+          box-shadow: 0 4px 20px rgba(201, 169, 98, 0.4);
+        }
+
+        .card-badge {
+          position: absolute;
+          top: 16px;
+          left: 16px;
+          padding: 6px 14px;
+          background: linear-gradient(135deg, #c9a962 0%, #a88a4a 100%);
+          color: #0a0a0f;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          border-radius: 20px;
+          z-index: 2;
+        }
+
+        .card-info {
+          background: rgba(0, 0, 0, 0.2);
+          border-top: 1px solid rgba(201, 169, 98, 0.1);
+        }
+
+        .brand-badge {
+          font-size: 10px;
+          text-transform: uppercase;
+          font-weight: 700;
+          color: #c9a962;
+          letter-spacing: 2.5px;
+          display: block;
+          margin-bottom: 8px;
+        }
+
+        .product-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 1.2rem;
+          font-weight: 600;
+          color: #ffffff;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-bottom: 8px;
+        }
+
+        .price-divider {
+          width: 30px;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(201, 169, 98, 0.5), transparent);
+          margin: 12px auto;
+        }
+
+        .price-label {
+          font-family: 'Inter', sans-serif;
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #c9a962;
+          margin: 0;
+          letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 576px) {
+          .premium-card { border-radius: 16px; }
+          .image-holder { padding: 16px; }
+        }
+
         html, body {
           overflow-x: hidden;
           width: 100%;
@@ -467,7 +638,6 @@ function Home() {
           z-index: 1;
         }
 
-        /* SEARCH BAR & FILTERS - PREMIUM GOLD THEME */
         .clean-search-wrapper {
           position: relative;
           display: flex;
@@ -533,7 +703,6 @@ function Home() {
           font-weight: 600;
         }
 
-        /* SECTION HEADER */
         .luxury-heading {
           font-family: 'Playfair Display', serif;
           font-size: 2.8rem;
@@ -559,162 +728,12 @@ function Home() {
           border-radius: 1px;
         }
 
-        /* PREMIUM PRODUCTS CARD ARCHITECTURE */
-        .premium-card {
-          background: rgba(255, 255, 255, 0.02);
-          border-radius: 20px;
-          padding: 0px;
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          overflow: hidden;
-          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-          backdrop-filter: blur(10px);
-        }
-
-        .premium-card:hover {
-          transform: translateY(-12px);
-          border-color: rgba(201, 169, 98, 0.3);
-          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(201, 169, 98, 0.1);
-        }
-
-        .image-holder {
-          background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-          border-radius: 20px 20px 0 0;
-          padding: 0px;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-          width: 100%;
-          aspect-ratio: 1 / 1;
-          transition: all 0.4s ease;
-        }
-
-        .premium-card:hover .image-holder {
-          background: linear-gradient(180deg, rgba(201, 169, 98, 0.05) 0%, rgba(255,255,255,0.02) 100%);
-        }
-
-        .main-watch-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-          cursor: pointer;
-        }
-
-        .premium-card:hover .main-watch-img {
-          transform: scale(1.08);
-        }
-
-        /* FLOATING ACTION STRIP */
-        .icon-action-strip {
-          position: absolute;
-          bottom: -50px; 
-          left: 50%;
-          transform: translateX(-50%);
-          display: flex;
-          background: rgba(10, 10, 15, 0.9);
-          backdrop-filter: blur(20px);
-          padding: 8px;
-          border-radius: 40px;
-          border: 1px solid rgba(201, 169, 98, 0.2);
-          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-          gap: 8px;
-          opacity: 0;
-          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .premium-card:hover .icon-action-strip {
-          bottom: 16px; 
-          opacity: 1;
-        }
-
-        .action-circle {
-          width: 42px;
-          height: 42px;
-          border-radius: 50%;
-          border: none;
-          background: rgba(255, 255, 255, 0.05);
-          color: rgba(255, 255, 255, 0.7);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          font-size: 16px;
-        }
-
-        .action-circle:hover {
-          background: rgba(201, 169, 98, 0.2);
-          color: #c9a962;
-          transform: scale(1.1);
-        }
-
-        .action-circle:active {
-          transform: scale(0.95);
-        }
-
-        .action-circle.gold-fill {
-          background: linear-gradient(135deg, #c9a962, #d4af37);
-          color: #0a0a0f;
-        }
-
-        .action-circle.gold-fill:hover {
-          box-shadow: 0 0 20px rgba(201, 169, 98, 0.5);
-          transform: scale(1.1);
-        }
-
-        /* PRODUCT DETAILS SYNCED METADATA */
-        .card-info {
-          background: rgba(0, 0, 0, 0.3);
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .brand-badge {
-          font-size: 10px;
-          text-transform: uppercase;
-          font-weight: 700;
-          color: #c9a962;
-          letter-spacing: 3px;
-          display: block;
-          margin-bottom: 8px;
-        }
-
-        .product-title {
-          font-family: 'Playfair Display', serif;
-          font-size: 1.2rem;
-          font-weight: 600;
-          color: #ffffff;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          margin-bottom: 8px;
-          padding: 0 4px;
-        }
-
-        .price-divider {
-          width: 30px;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(201, 169, 98, 0.5), transparent);
-          margin: 12px auto;
-        }
-        
         .price-divider.left-align {
           margin: 12px 0;
           width: 50px;
           background: linear-gradient(90deg, #c9a962, transparent);
         }
 
-        .price-label {
-          font-family: 'Plus Jakarta Sans', sans-serif;
-          font-size: 1.15rem;
-          font-weight: 600;
-          color: #c9a962;
-          margin: 0;
-          letter-spacing: 0.5px;
-        }
-
-        /* MODAL ARCHITECTURE WITH LUXURY SYNC */
         .custom-modal-overlay {
           position: fixed;
           inset: 0;
@@ -788,7 +807,7 @@ function Home() {
           text-transform: uppercase;
           color: #c9a962;
           display: inline-block;
-        }
+          }
 
         .modal-product-title {
           font-family: 'Playfair Display', serif;
@@ -889,132 +908,134 @@ function Home() {
           border-color: #c9a962;
         }
 
-        /* RESPONSIVE ADAPTIVE BREAKPOINTS */
+        /* ================= LOAD MORE / VIEW ALL BUTTON ================= */
+.load-more-btn {
+  background: transparent;
+  color: #c9a962;
+  border: 1px solid rgba(201, 169, 98, 0.4);
+  padding: 14px 40px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-radius: 40px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-top: 30px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.load-more-btn:hover {
+  color: #0a0a0f;
+  background: linear-gradient(135deg, #c9a962 0%, #a88a4a 100%);
+  border-color: transparent;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(201, 169, 98, 0.25);
+}
+
+.load-more-btn:active {
+  transform: translateY(-1px);
+}
+
+/* ================= TRUST / WHY CHOOSE US SECTION ================= */
+.trust-section-wrapper {
+  margin-top: 5rem !important;
+  margin-bottom: 5rem !important;
+  position: relative;
+  z-index: 1;
+}
+
+.section-subtitle {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.trust-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(201, 169, 98, 0.08);
+  border-radius: 20px;
+  padding: 35px 25px;
+  text-center;
+  text-align: center;
+  height: 100%;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.trust-card:hover {
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(201, 169, 98, 0.25);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(201, 169, 98, 0.05);
+}
+
+.trust-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.trust-icon {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: rgba(201, 169, 98, 0.06);
+  border: 1px solid rgba(201, 169, 98, 0.15);
+  color: #c9a962;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  transition: all 0.4s ease;
+}
+
+.trust-card:hover .trust-icon {
+  background: linear-gradient(135deg, #c9a962 0%, #a88a4a 100%);
+  color: #0a0a0f;
+  border-color: transparent;
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 8px 20px rgba(201, 169, 98, 0.2);
+}
+
+.trust-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.trust-desc {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 0;
+  font-weight: 300;
+}
+
+@media (max-width: 768px) {
+  .trust-card {
+    padding: 25px 15px;
+  }
+  .trust-title {
+    font-size: 1.15rem;
+  }
+}
+
         @media (max-width: 768px) {
           .custom-modal-box { padding: 32px 20px; }
           .actions-btn-group { flex-direction: column; gap: 12px !important; }
           .modal-product-title { font-size: 1.75rem; }
           .luxury-heading { font-size: 2rem; }
-        }
-
-        /* LOAD MORE BUTTON */
-        .load-more-btn {
-          background: linear-gradient(135deg, #c9a962, #d4af37);
-          color: #0a0a0f;
-          border: none;
-          padding: 16px 40px;
-          border-radius: 50px;
-          font-size: 14px;
-          font-weight: 700;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: all 0.4s ease;
-          box-shadow: 0 15px 40px rgba(201, 169, 98, 0.25);
-        }
-
-        .load-more-btn:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 20px 50px rgba(201, 169, 98, 0.35);
-        }
-
-        .load-more-btn:active {
-          transform: scale(0.97);
-        }
-
-        /* WHY CHOOSE US - LUXURY STYLES */
-        .trust-section-wrapper {
-          font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .section-subtitle {
-          font-size: 15px;
-          color: rgba(255, 255, 255, 0.5);
-          letter-spacing: 0.5px;
-        }
-
-        .trust-card {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          border-radius: 24px;
-          padding: 45px 28px;
-          text-align: center;
-          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-          height: 100%;
-          position: relative;
-          overflow: hidden;
-          backdrop-filter: blur(10px);
-        }
-
-        .trust-card:hover {
-          transform: translateY(-12px);
-          border-color: rgba(201, 169, 98, 0.3);
-          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(201, 169, 98, 0.1);
-        }
-
-        .trust-icon-wrapper {
-          width: 80px;
-          height: 80px;
-          margin: 0 auto 28px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(201, 169, 98, 0.05);
-          border-radius: 50%;
-          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .trust-icon {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(201, 169, 98, 0.2);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 24px;
-          color: #c9a962;
-          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .trust-card:hover .trust-icon-wrapper {
-          background: rgba(201, 169, 98, 0.1);
-          transform: scale(1.1);
-        }
-
-        .trust-card:hover .trust-icon {
-          background: linear-gradient(135deg, #c9a962, #d4af37);
-          color: #0a0a0f;
-          border-color: transparent;
-          box-shadow: 0 0 30px rgba(201, 169, 98, 0.4);
-        }
-
-        .trust-title {
-          font-family: 'Playfair Display', serif;
-          font-size: 1.35rem;
-          font-weight: 600;
-          margin-bottom: 14px;
-          color: #ffffff;
-          transition: color 0.3s ease;
-        }
-
-        .trust-card:hover .trust-title {
-          color: #c9a962;
-        }
-
-        .trust-desc {
-          font-size: 14px;
-          color: rgba(255, 255, 255, 0.45);
-          margin: 0;
-          line-height: 1.7;
-          font-weight: 400;
-        }
-
-        @media (max-width: 576px) {
-          .trust-card {
-            padding: 35px 20px;
-          }
         }
       `}</style>
     </div>

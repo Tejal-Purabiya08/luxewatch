@@ -483,12 +483,12 @@ router.get("/invoice/:id", async (req, res) => {
     doc
       .fillColor("white")
       .fontSize(14)
-      .text("Grand Total", 360, y + 15);
+      .text("Grand Total ", 360, y + 15);
 
     doc
       .fontSize(18)
       .text(
-        `Rs. ${order.totalAmount}`,
+        `${order.totalAmount}`,
         430,
         y + 14
       );

@@ -189,13 +189,13 @@ function UserProfile() {
                 
                 <div className="meta-info-list text-start pt-3 border-top border-luxury">
                   <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span className="text-muted extra-small">Registry Status</span>
+                    <span className="text-muted subtitle extra-small">Registry Status</span>
                     <span className="text-gold fw-semibold small d-flex align-items-center gap-15">
                       <span className="dot-online"></span> {sessionUser.status || "Active"}
                     </span>
                   </div>
                   <div className="d-flex justify-content-between align-items-center">
-                    <span className="text-muted extra-small">User Token ID</span>
+                    <span className="text-muted subtitle extra-small">User Token ID</span>
                     <span className="font-monospace text-white-50 extra-small">
                       #{sessionUser._id?.substring(0, 8).toUpperCase()}
                     </span>

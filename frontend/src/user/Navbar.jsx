@@ -5,25 +5,16 @@ import API from "../api/axios";
 
 function Navbar() {
   const navigate = useNavigate();
-
   const user = JSON.parse(localStorage.getItem("user") || "null");
-
   const [showMenu, setShowMenu] = useState(false);
-
-  // CART COUNT
   const [cartCount, setCartCount] = useState(0);
 
-  // LOAD CART
   const loadCartCount = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-
       if (!user) return;
-
       const res = await API.get(`/api/cart/${user._id}`);
-
       const count = res.data?.items?.length || 0;
-
       setCartCount(count);
     } catch (err) {
       console.log(err);
@@ -32,10 +23,7 @@ function Navbar() {
 
   useEffect(() => {
     loadCartCount();
-
-    // LIVE UPDATE EVENT
     window.addEventListener("cartUpdated", loadCartCount);
-
     return () => {
       window.removeEventListener("cartUpdated", loadCartCount);
     };
@@ -44,33 +32,21 @@ function Navbar() {
   const handleLogout = () => {
     Swal.fire({
       title: "Are you sure?",
-
       text: "You will be logged out of your session!",
-
       icon: "warning",
-
       showCancelButton: true,
-
       confirmButtonColor: "#c9a962",
-
       cancelButtonColor: "#1a1a2e",
-
       confirmButtonText: "Yes, Logout",
-
       background: "rgba(255,255,255,0.98)",
     }).then((result) => {
       if (result.isConfirmed) {
         localStorage.removeItem("user");
-
         navigate("/");
-
         Swal.fire({
           title: "Logged Out!",
-
           icon: "success",
-
           timer: 1200,
-
           showConfirmButton: false,
         });
       }
@@ -81,35 +57,33 @@ function Navbar() {
     <>
       <nav className="custom-navbar">
         <div className="nav-container">
-          {/* LOGO */}
-
-          <Link to="/home" className="nav-logo">
-            <span className="logo-icon">⌚</span>
-            LUXE<span>WATCH</span>
+          {/* IDENTICAL BRAND LOGO */}
+          <Link to="/home" className="nav-brand-logo">
+            <div className="brand-logo-box">
+              <i className="bi bi-watch"></i>
+            </div>
+            <span className="brand-logo-text">LUXE WATCH</span>
           </Link>
 
           {/* RIGHT MENU */}
-
           <div className="nav-menu">
             {user?.role === "user" && (
               <div className="user-profile">
                 <div className="avatar">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
-
                 <span className="welcome-text">Hi, {user.name}</span>
               </div>
             )}
 
             {/* DESKTOP MENU */}
-
             <Link to="/home" className="nav-link text-light">
               <i className="bi bi-house-door-fill p-2"></i>
               Home
             </Link>
 
             {/* WISHLIST */}
-            <Link to="/wishlist" className="cart-btn wishlist-btn" >
+            <Link to="/wishlist" className="cart-btn wishlist-btn">
               <i className="bi bi-heart-fill"></i>
               Wishlist
             </Link>
@@ -128,7 +102,6 @@ function Navbar() {
             </div>
 
             {/* SETTINGS BUTTON */}
-
             <button className="settings-btn" onClick={() => setShowMenu(true)}>
               <i className="bi bi-list"></i>
             </button>
@@ -137,121 +110,76 @@ function Navbar() {
       </nav>
 
       {/* OFFCANVAS OVERLAY */}
-
       <div
         className={`offcanvas-overlay ${showMenu ? "show" : ""}`}
         onClick={() => setShowMenu(false)}
       ></div>
 
       {/* OFFCANVAS */}
-
       <div className={`custom-offcanvas ${showMenu ? "active" : ""}`}>
-        {/* TOP */}
-
         <div className="offcanvas-top">
           <div>
             <h4>
               <i className="bi bi-gear-fill me-2"></i>
               Settings
             </h4>
-
             <p>Manage your account</p>
           </div>
-
           <button className="close-btn" onClick={() => setShowMenu(false)}>
             <i className="bi bi-x-lg"></i>
           </button>
         </div>
 
-        {/* USER */}
-
         <div className="offcanvas-user">
           <div className="offcanvas-avatar">
             {user?.name?.charAt(0).toUpperCase()}
           </div>
-
           <div>
             <h6>{user?.name}</h6>
-
             <small>{user?.email}</small>
           </div>
         </div>
 
-        {/* MENU */}
-
         <div className="offcanvas-links">
-          <Link
-            to="/user-profile"
-            className="offcanvas-item"
-            onClick={() => setShowMenu(false)}
-          >
-            <i className="bi bi-person-circle"></i>
-            My Profile
+          <Link to="/user-profile" className="offcanvas-item" onClick={() => setShowMenu(false)}>
+            <i className="bi bi-person-circle"></i> My Profile
           </Link>
-
-          <Link
-            to="/orders"
-            className="offcanvas-item"
-            onClick={() => setShowMenu(false)}
-          >
-            <i className="bi bi-bag-check-fill"></i>
-            My Orders
+          <Link to="/orders" className="offcanvas-item" onClick={() => setShowMenu(false)}>
+            <i className="bi bi-bag-check-fill"></i> My Orders
           </Link>
-
-          <Link
-            to="/wishlist"
-            className="offcanvas-item"
-            onClick={() => setShowMenu(false)}
-          >
-            <i className="bi bi-heart-fill"></i>
-            Wishlist
+          <Link to="/wishlist" className="offcanvas-item" onClick={() => setShowMenu(false)}>
+            <i className="bi bi-heart-fill"></i> Wishlist
           </Link>
-
-          <Link
-            to="/cart"
-            className="offcanvas-item"
-            onClick={() => setShowMenu(false)}
-          >
-            <i className="bi bi-cart-fill"></i>
-            Shopping Cart
+          <Link to="/cart" className="offcanvas-item" onClick={() => setShowMenu(false)}>
+            <i className="bi bi-cart-fill"></i> Shopping Cart
             <span className="inside-cart-count">{cartCount}</span>
           </Link>
-
           <button onClick={handleLogout} className="offcanvas-item logout-item">
-            <i className="bi bi-box-arrow-right"></i>
-            Logout
+            <i className="bi bi-box-arrow-right"></i> Logout
           </button>
         </div>
 
-        {/* FOOTER */}
         <div className="offcanvas-footer">
-          <p>LUXEWATCH © 2024</p>
+          <p>LUXEWATCH © 2026</p>
           <small>Premium Timepieces</small>
         </div>
       </div>
 
       <style>{`
-
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
         *{
-
           margin:0;
-
           padding:0;
-
           box-sizing:border-box;
         }
 
         body{
-
           overflow-x:hidden;
-
           font-family:'Inter',sans-serif;
         }
 
         /* ============ NAVBAR ============ */
-
         .custom-navbar {
           background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
           backdrop-filter: blur(20px);
@@ -272,39 +200,45 @@ function Navbar() {
           padding: 0 24px;
         }
 
-        /* ============ LOGO ============ */
-
-        .nav-logo {
-          font-family: 'Playfair Display', serif;
-          font-size: 28px;
-          font-weight: 700;
-          color: #ffffff;
+        /* ============ GLOBAL IDENTICAL BRAND LOGO ============ */
+        .nav-brand-logo {
           text-decoration: none;
           display: flex;
           align-items: center;
-          gap: 8px;
-          letter-spacing: 2px;
+          gap: 12px;
           transition: all 0.3s ease;
         }
 
-        .nav-logo:hover {
-          transform: scale(1.02);
+        .brand-logo-box {
+          width: 42px;
+          height: 42px;
+          background: linear-gradient(135deg, #c9a962 0%, #e8d5a3 50%, #c9a962 100%);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          color: #0a0c1a;
+          box-shadow: 0 4px 15px rgba(201, 169, 98, 0.2);
         }
 
-        .logo-icon {
-          font-size: 24px;
-          filter: drop-shadow(0 0 8px rgba(201, 169, 98, 0.5));
-        }
-
-        .nav-logo span {
-          background: linear-gradient(135deg, #c9a962 0%, #f7e7a0 50%, #c9a962 100%);
+        .brand-logo-text {
+          font-family: 'Playfair Display', serif;
+          font-size: 1.8rem;
+          font-weight: 700;
+          letter-spacing: 3px;
+          background: linear-gradient(135deg, #c9a962 0%, #e8d5a3 50%, #c9a962 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
 
-        /* ============ NAV MENU ============ */
+        .nav-brand-logo:hover {
+          transform: translateY(-1px);
+          opacity: 0.9;
+        }
 
+        /* ============ NAV MENU ============ */
         .nav-menu {
           display: flex;
           align-items: center;
@@ -318,7 +252,6 @@ function Navbar() {
         }
 
         /* ============ USER PROFILE ============ */
-
         .user-profile {
           display: flex;
           align-items: center;
@@ -357,7 +290,6 @@ function Navbar() {
         }
 
         /* ============ NAV LINKS ============ */
-
         .nav-link {
           color: #e8e8e8 !important;
           text-decoration: none;
@@ -378,12 +310,7 @@ function Navbar() {
           color: #c9a962 !important;
         }
 
-        .nav-link i {
-          font-size: 16px;
-        }
-
         /* ============ CART & WISHLIST BUTTONS ============ */
-
         .cart-btn {
           background: transparent;
           border: 1px solid rgba(201, 169, 98, 0.4);
@@ -408,10 +335,6 @@ function Navbar() {
           transform: translateY(-2px);
         }
 
-        .cart-btn i {
-          font-size: 16px;
-        }
-
         .wishlist-btn i {
           color: #e74c3c;
         }
@@ -425,7 +348,7 @@ function Navbar() {
           top: -8px;
           right: -8px;
           background: linear-gradient(135deg, #c9a962 0%, #f7e7a0 100%);
-          color: #0a0a0f;
+          color: #0a0f1a;
           width: 22px;
           height: 22px;
           border-radius: 50%;
@@ -438,7 +361,6 @@ function Navbar() {
         }
 
         /* ============ LOGOUT BUTTON ============ */
-
         .logout-btn {
           background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
           border: 1px solid rgba(231, 76, 60, 0.4);
@@ -462,7 +384,6 @@ function Navbar() {
         }
 
         /* ============ SETTINGS BUTTON ============ */
-
         .settings-btn {
           width: 48px;
           height: 48px;
@@ -486,7 +407,6 @@ function Navbar() {
         }
 
         /* ============ OVERLAY ============ */
-
         .offcanvas-overlay {
           position: fixed;
           inset: 0;
@@ -503,8 +423,7 @@ function Navbar() {
           visibility: visible;
         }
 
-        /* ============ OFFCANVAS ============ */
-
+        /* ============ FIXED COMPLETED OFFCANVAS CSS ============ */
         .custom-offcanvas {
           position: fixed;
           top: 0;
@@ -528,8 +447,6 @@ function Navbar() {
           transform: translateX(0);
         }
 
-        /* ============ OFFCANVAS TOP ============ */
-
         .offcanvas-top {
           display: flex;
           justify-content: space-between;
@@ -546,6 +463,7 @@ function Navbar() {
           color: #0a0a0f;
           display: flex;
           align-items: center;
+          font-weight: 700;
         }
 
         .offcanvas-top h4 i {
@@ -555,6 +473,7 @@ function Navbar() {
         .offcanvas-top p {
           color: #6c757d;
           font-size: 14px;
+          margin: 0;
         }
 
         .close-btn {
@@ -569,6 +488,7 @@ function Navbar() {
           align-items: center;
           justify-content: center;
           font-size: 16px;
+          color: #333;
         }
 
         .close-btn:hover {
@@ -576,8 +496,6 @@ function Navbar() {
           color: white;
           transform: rotate(90deg);
         }
-
-        /* ============ OFFCANVAS USER ============ */
 
         .offcanvas-user {
           display: flex;
@@ -587,26 +505,26 @@ function Navbar() {
           padding: 20px;
           border-radius: 20px;
           margin-bottom: 30px;
-          border: 1px solid rgba(201, 169, 98, 0.2);
+          border: 1px solid rgba(201, 169, 98, 0.15);
         }
 
         .offcanvas-avatar {
-          width: 60px;
-          height: 60px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #c9a962 0%, #f7e7a0 100%);
-          color: #0a0a0f;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-size: 24px;
+          background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+          color: #c9a962;
           font-weight: 700;
-          box-shadow: 0 4px 15px rgba(201, 169, 98, 0.3);
+          font-size: 18px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(201, 169, 98, 0.3);
         }
 
         .offcanvas-user h6 {
-          font-size: 18px;
-          margin-bottom: 4px;
+          margin: 0 0 4px 0;
+          font-size: 16px;
           font-weight: 600;
           color: #0a0a0f;
         }
@@ -616,184 +534,95 @@ function Navbar() {
           font-size: 13px;
         }
 
-        /* ============ OFFCANVAS LINKS ============ */
-
         .offcanvas-links {
           display: flex;
           flex-direction: column;
           gap: 10px;
-          flex: 1;
+          flex-grow: 1;
         }
 
         .offcanvas-item {
-          width: 100%;
-          padding: 16px 20px;
-          border-radius: 16px;
-          background: #f8f9fa;
-          border: 1px solid transparent;
-          text-decoration: none;
           display: flex;
           align-items: center;
-          gap: 16px;
-          color: #0a0a0f;
+          gap: 14px;
+          padding: 14px 20px;
+          border-radius: 12px;
+          color: #333333;
+          text-decoration: none;
           font-weight: 500;
-          transition: all 0.3s ease;
-          cursor: pointer;
           font-size: 15px;
-        }
-
-        .offcanvas-item:hover {
-          background: rgba(201, 169, 98, 0.1);
-          border-color: rgba(201, 169, 98, 0.3);
-          transform: translateX(6px);
+          transition: all 0.3s ease;
+          border: 1px solid transparent;
+          background: transparent;
+          width: 100%;
+          text-align: left;
         }
 
         .offcanvas-item i {
-          font-size: 20px;
+          font-size: 18px;
+          color: #6c757d;
+          transition: color 0.3s ease;
+        }
+
+        .offcanvas-item:hover {
+          background: rgba(201, 169, 98, 0.08);
           color: #c9a962;
-          width: 24px;
-          text-align: center;
+          border-color: rgba(201, 169, 98, 0.2);
+          padding-left: 24px;
+        }
+
+        .offcanvas-item:hover i {
+          color: #c9a962;
         }
 
         .inside-cart-count {
           margin-left: auto;
-          background: linear-gradient(135deg, #c9a962 0%, #f7e7a0 100%);
-          color: #0a0a0f;
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          background: #0a0a0f;
+          color: #c9a962;
+          padding: 2px 10px;
+          border-radius: 20px;
           font-size: 12px;
           font-weight: 700;
         }
 
         .logout-item {
-          background: rgba(231, 76, 60, 0.08);
-          color: #e74c3c;
-          margin-top: 10px;
+          margin-top: 20px;
+          color: #e74c3c !important;
+          border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+          border-radius: 12px !important;
         }
 
         .logout-item i {
-          color: #e74c3c;
+          color: #e74c3c !important;
         }
 
         .logout-item:hover {
-          background: #e74c3c;
-          color: white;
-          border-color: #e74c3c;
+          background: rgba(231, 76, 60, 0.08) !important;
+          border-color: rgba(231, 76, 60, 0.2) !important;
         }
-
-        .logout-item:hover i {
-          color: white;
-        }
-
-        /* ============ OFFCANVAS FOOTER ============ */
 
         .offcanvas-footer {
           margin-top: auto;
-          padding-top: 20px;
-          border-top: 1px solid rgba(201, 169, 98, 0.2);
           text-align: center;
+          padding-top: 20px;
+          border-top: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .offcanvas-footer p {
           font-family: 'Playfair Display', serif;
-          font-size: 16px;
-          font-weight: 600;
+          font-size: 14px;
+          font-weight: 700;
           color: #0a0a0f;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
+          letter-spacing: 1px;
         }
 
         .offcanvas-footer small {
-          color: #c9a962;
+          color: #a1a1aa;
           font-size: 12px;
-          letter-spacing: 2px;
           text-transform: uppercase;
+          letter-spacing: 2px;
         }
-
-        /* ============ RESPONSIVE ============ */
-
-        @media (max-width: 992px) {
-          .desktop-menu {
-            display: none;
-          }
-
-          .welcome-text {
-            display: none;
-          }
-
-          .nav-link {
-            display: none;
-          }
-
-            .wishlist-btn {
-    display: none;
-  }
-
-        }
-
-        @media (max-width: 600px) {
-          .custom-offcanvas {
-            width: 100%;
-            max-width: 100%;
-            padding: 24px;
-          }
-
-          .nav-logo {
-            font-size: 22px;
-          }
-
-          .logo-icon {
-            font-size: 20px;
-          }
-
-          .nav-container {
-            padding: 0 16px;
-          }
-
-          .user-profile {
-            padding: 6px 12px;
-          }
-
-          .avatar {
-            width: 32px;
-            height: 32px;
-            font-size: 13px;
-          }
-
-          .settings-btn {
-            width: 42px;
-            height: 42px;
-            font-size: 18px;
-          }
-
-          .wishlist-btn {
-            padding: 8px 12px;
-          }
-
-          .cart-btn i {
-            font-size: 14px;
-          }
-        }
-
-        /* ============ ANIMATIONS ============ */
-
-        @keyframes shimmer {
-          0% {
-            background-position: -200% center;
-          }
-          100% {
-            background-position: 200% center;
-          }
-        }
-
-        .nav-logo span {
-          background-size: 200% auto;
-          animation: shimmer 3s linear infinite;
-        }
-
       `}</style>
     </>
   );

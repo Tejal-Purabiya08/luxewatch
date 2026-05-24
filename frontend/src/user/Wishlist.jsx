@@ -230,7 +230,7 @@ useEffect(() => {
                   <h5 className="fw-bold mb-3 pb-2 border-bottom text-white text-start" style={{ borderColor: 'rgba(201,169,98,0.15) !important' }}>
                     Wishlist Actions
                   </h5>
-                  <p className="text-muted small text-start mb-4" style={{ color: 'rgba(255,255,255,0.5) !important' }}>
+                  <p className="subtitle text-muted small text-start mb-4" style={{ color: 'rgba(255,255,255,0.5) !important' }}>
                     Ready to complete your look? Add items to your shopping cart or continue exploring our luxury catalogs.
                   </p>
                   

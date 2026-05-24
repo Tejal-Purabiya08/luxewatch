@@ -169,10 +169,10 @@ function Orders() {
                         </h6>
                         <div className="address-box p-3 rounded-4">
                           <p className="mb-1 fw-bold text-white small">{order.address?.name}</p>
-                          <p className="mb-1 text-muted extra-small lh-base">
+                          <p className="mb-1 subtitle text-muted extra-small lh-base">
                             {order.address?.fullAddress}, {order.address?.city}
                           </p>
-                          <p className="mb-2 text-muted extra-small">
+                          <p className="mb-2 subtitle text-muted extra-small">
                             Pincode: {order.address?.pincode || "382345"}
                           </p>
                           <p className="mb-0 extra-small fw-semibold text-gold">
