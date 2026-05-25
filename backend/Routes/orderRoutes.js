@@ -265,6 +265,7 @@ router.put("/admin/update-status/:id", async (req, res) => {
 });
 
 
+// 📄 PREMIUM & SAFE INVOICE GENERATION
 router.get("/invoice/:id", async (req, res) => {
   try {
     const order = await Order.findById(req.params.id).populate("items.productId");
@@ -273,46 +274,24 @@ router.get("/invoice/:id", async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    const PDFDocument = require("pdfkit");
-
-    // Standard A4 Layout Setup with buffer pages enabled for safe page calculations
     const doc = new PDFDocument({
       margin: 40,
       size: "A4",
       bufferPages: true 
     });
 
-    // RESPONSE HEADERS
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename=invoice-${order._id}.pdf`);
-
     doc.pipe(res);
 
     // ====================================
     // REUSABLE HEADER FUNCTION
     // ====================================
     const drawHeader = () => {
-      // Top Dark Minimal Bar
       doc.rect(0, 0, 600, 110).fill("#0f172a");
-
-      doc
-        .fillColor("#ffffff")
-        .font("Helvetica-Bold")
-        .fontSize(24)
-        .text("LUXE STORE", 40, 35, { characterSpacing: 1 });
-
-      doc
-        .fontSize(10)
-        .font("Helvetica")
-        .fillColor("#94a3b8")
-        .text("Premium E-Commerce Experience", 40, 68);
-
-      // Right-aligned Invoice Title in Banner
-      doc
-        .fillColor("#ffffff")
-        .font("Helvetica-Bold")
-        .fontSize(26)
-        .text("INVOICE", 40, 42, { align: "right", width: 515 });
+      doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(24).text("LUXE STORE", 40, 35, { characterSpacing: 1 });
+      doc.fontSize(10).font("Helvetica").fillColor("#94a3b8").text("Premium E-Commerce Experience", 40, 68);
+      doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(26).text("INVOICE", 40, 42, { align: "right", width: 515 });
     };
 
     // First page header print karein
@@ -324,11 +303,9 @@ router.get("/invoice/:id", async (req, res) => {
     let currentY = 135;
     doc.fillColor("#0f172a").fontSize(10);
     
-    // Left Details
     doc.font("Helvetica-Bold").text("Invoice To:", 40, currentY);
     doc.font("Helvetica").text(order.address?.name || "Customer", 40, currentY + 15);
     
-    // Right Details (Invoice Meta)
     const invNumber = order.invoiceNumber || "INV-" + order._id.toString().slice(-6).toUpperCase();
     const invDate = new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
     
@@ -345,22 +322,13 @@ router.get("/invoice/:id", async (req, res) => {
     // SHIPPING & BILLING BOX
     // ====================================
     currentY = 200;
-    doc
-      .roundedRect(40, currentY, 515, 75, 6)
-      .strokeColor("#e2e8f0")
-      .lineWidth(1)
-      .stroke();
-
+    doc.roundedRect(40, currentY, 515, 75, 6).strokeColor("#e2e8f0").lineWidth(1).stroke();
     doc.font("Helvetica-Bold").fontSize(11).fillColor("#1e293b").text("Shipping Address", 55, currentY + 12);
     
     doc.font("Helvetica").fontSize(10).fillColor("#475569");
     doc.text(`Phone:  ${order.address?.phone || '-'}`, 55, currentY + 32);
     doc.text(`City:   ${order.address?.city || '-'}`, 55, currentY + 48);
-    
-    doc.text(`Address: ${order.address?.fullAddress || '-'}`, 260, currentY + 32, {
-      width: 280,
-      lineGap: 3
-    });
+    doc.text(`Address: ${order.address?.fullAddress || '-'}`, 260, currentY + 32, { width: 280, lineGap: 3 });
 
     // ====================================
     // REUSABLE TABLE HEADER FUNCTION
@@ -379,17 +347,15 @@ router.get("/invoice/:id", async (req, res) => {
     currentY += 26;
 
     // ====================================
-    // PRODUCT ROWS (Dynamic Height & Page-break Safe)
+    // PRODUCT ROWS (Dynamic Height)
     // ====================================
     order.items.forEach((item, index) => {
       const total = item.price * item.quantity;
       const productName = item.productId?.name || "Premium Product";
       
-      // Calculate text height dynamically to prevent overlap
       const textHeight = doc.heightOfString(productName, { width: 250 });
       const rowHeight = Math.max(textHeight + 16, 32); 
 
-      // Page overflow check (700 tak safe limit hoti hai)
       if (currentY + rowHeight > 700) {
         doc.addPage();
         drawHeader();
@@ -398,28 +364,19 @@ router.get("/invoice/:id", async (req, res) => {
         currentY += 26;
       }
 
-      // Alternating light background row styling
       if (index % 2 === 0) {
         doc.rect(40, currentY, 515, rowHeight).fill("#f8fafc");
       }
 
+      // Explicitly reset fill state context to avoid rendering engine locks
       doc.fillColor("#0f172a").font("Helvetica").fontSize(10);
 
-      // Product Name wrapping strictly inside width bounds
       doc.text(productName, 55, currentY + 10, { width: 250 });
-      
-      // Values (Using clean standard INR format instead of broken symbol)
       doc.text(item.quantity.toString(), 320, currentY + 10, { width: 40, align: "center" });
       doc.text(`INR ${item.price.toLocaleString('en-IN')}`, 380, currentY + 10, { width: 70, align: "right" });
       doc.text(`INR ${total.toLocaleString('en-IN')}`, 460, currentY + 10, { width: 85, align: "right" });
 
-      // Light Divider Line below row
-      doc
-        .moveTo(40, currentY + rowHeight)
-        .lineTo(555, currentY + rowHeight)
-        .strokeColor("#f1f5f9")
-        .stroke();
-
+      doc.moveTo(40, currentY + rowHeight).lineTo(555, currentY + rowHeight).strokeColor("#f1f5f9").stroke();
       currentY += rowHeight;
     });
 
@@ -427,30 +384,23 @@ router.get("/invoice/:id", async (req, res) => {
     // SUMMARY / TOTALS SECTION
     // ====================================
     currentY += 15;
-
-    // Check custom space for Summary block
     if (currentY + 65 > 710) {
       doc.addPage();
       drawHeader();
       currentY = 135;
     }
 
-    // Subtotal Row
     doc.font("Helvetica").fontSize(10).fillColor("#64748b");
     doc.text("Subtotal:", 360, currentY, { width: 100, align: "right" });
     doc.font("Helvetica-Bold").fillColor("#1e293b");
     doc.text(`INR ${order.totalAmount.toLocaleString('en-IN')}`, 460, currentY, { width: 85, align: "right" });
 
-    // Grand Total Accent Box
     currentY += 20;
     doc.rect(360, currentY, 195, 35).fill("#0f172a");
 
     doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(11);
     doc.text("Grand Total", 375, currentY + 12);
-    doc.fontSize(12).text(`INR ${order.totalAmount.toLocaleString('en-IN')}`, 450, currentY + 11, {
-      width: 95,
-      align: "right"
-    });
+    doc.fontSize(12).text(`INR ${order.totalAmount.toLocaleString('en-IN')}`, 450, currentY + 11, { width: 95, align: "right" });
 
     // ====================================
     // FOOTER (Multi-page Loop Engine)
@@ -458,38 +408,17 @@ router.get("/invoice/:id", async (req, res) => {
     const pages = doc._bufferedPages;
     pages.forEach((page, i) => {
       doc.switchToPage(i);
-      
-      // Bottom line layout
-      doc
-        .moveTo(40, 730)
-        .lineTo(555, 730)
-        .strokeColor("#e2e8f0")
-        .stroke();
-
-      doc
-        .fillColor("#475569")
-        .font("Helvetica-Bold")
-        .fontSize(10)
-        .text("Thank you for shopping with Luxe Store!", 40, 745, {
-          align: "center",
-          width: 515
-        });
-
-      doc
-        .fillColor("#94a3b8")
-        .font("Helvetica")
-        .fontSize(8)
-        .text(`Page ${i + 1} of ${pages.length}  |  If you have any questions, please contact support@luxestore.com`, 40, 760, {
-          align: "center",
-          width: 515
-        });
+      doc.moveTo(40, 730).lineTo(555, 730).strokeColor("#e2e8f0").stroke();
+      doc.fillColor("#475569").font("Helvetica-Bold").fontSize(10).text("Thank you for shopping with Luxe Store!", 40, 745, { align: "center", width: 515 });
+      doc.fillColor("#94a3b8").font("Helvetica").fontSize(8).text(`Page ${i + 1} of ${pages.length}  |  If you have any questions, please contact support@luxestore.com`, 40, 760, { align: "center", width: 515 });
     });
 
     doc.end();
-
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: err.message });
+    console.error("Critical PDF Generation Error:", err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Internal Server Error", details: err.message });
+    }
   }
 });
 
