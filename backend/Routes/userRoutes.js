@@ -1,7 +1,12 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
+
+const resend = new Resend(
+  process.env.RESEND_API_KEY
+);
 
 const User = require("../model/userModel");
 
@@ -9,22 +14,18 @@ const { protect, adminOnly } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-const dns = require("dns");
-
-dns.setDefaultResultOrder("ipv4first");
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+// const transporter = nodemailer.createTransport({
+//   host: "smtp-relay.brevo.com",
+//   port: 587,
+//   secure: false,
+//   auth: {
+//     user: process.env.BREVO_USER,
+//     pass: process.env.BREVO_PASS,
+//   },
+// });
 
 // ================= REGISTER =================
+
 
 router.post("/register", async (req, res) => {
   try {
@@ -176,60 +177,12 @@ router.post("/forgot-password", async (req, res) => {
     await user.save();
 
     // SEND EMAIL
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-
-      to: user.email,
-
-      subject: "Password Reset OTP",
-
-      html: `
-          <div style="
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background: #f5f5f5;
-          ">
-            <div style="
-              max-width: 500px;
-              margin: auto;
-              background: white;
-              padding: 30px;
-              border-radius: 10px;
-              text-align: center;
-            ">
-              <h2 style="color:#333;">
-                Password Reset Request
-              </h2>
-
-              <p style="font-size:16px;color:#555;">
-                Use the OTP below to reset your password:
-              </p>
-
-              <h1 style="
-                letter-spacing: 8px;
-                color: #c9a962;
-                margin: 30px 0;
-              ">
-                ${otp}
-              </h1>
-
-              <p style="color:#777;">
-                This OTP will expire in
-                <b>10 minutes</b>.
-              </p>
-
-              <p style="
-                margin-top:30px;
-                font-size:13px;
-                color:#999;
-              ">
-                If you did not request this,
-                please ignore this email.
-              </p>
-            </div>
-          </div>
-        `,
-    });
+  await resend.emails.send({
+  from: process.env.EMAIL_FROM,
+  to: user.email,
+  subject: "Password Reset OTP",
+  html: `<h1>${otp}</h1>`,
+});
 
     res.json({
       message: "OTP sent to email",
