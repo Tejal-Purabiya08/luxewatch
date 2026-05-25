@@ -246,7 +246,7 @@ function Orders() {
                     </div>
                     <div className="d-flex gap-2">
                       <a
-                        href={`${process.env.REACT_APP_API_URL}/api/orders/invoice/${order._id}`}
+                        href={`${process.env.REACT_APP_API_URL?.replace(/\/$/, "")}/api/orders/invoice/${order._id}`}
                         target="_blank"
                         rel="noreferrer"
                         className="btn btn-modal-secondary px-3 py-2"
