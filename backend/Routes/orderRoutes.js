@@ -268,7 +268,8 @@ router.put("/admin/update-status/:id", async (req, res) => {
 
 router.get("/invoice/:id", async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id).populate("items.productId");
+    const order = await Order.findById(req.params.id)
+      .populate("items.productId");
 
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
@@ -288,160 +289,138 @@ router.get("/invoice/:id", async (req, res) => {
     doc.pipe(res);
 
     // ====================================
-    // HEADER BANNER (Premium Dark Top)
+    // HEADER BANNER
     // ====================================
-    doc.rect(0, 0, 600, 110).fill("#0f172a");
+    doc
+      .rect(0, 0, 600, 100) // Fixed width for A4 boundary
+      .fill("#111827");
 
     doc
-      .fillColor("#ffffff")
+      .fillColor("white")
       .fontSize(24)
-      .text("LUXE STORE", 40, 35, { stroke: false, characterSpacing: 1 });
+      .text("LUXE STORE", 40, 35, { stroke: false });
 
     doc
-      .fontSize(10)
-      .fillColor("#94a3b8")
-      .text("Premium E-Commerce Experience", 40, 68);
+      .fontSize(11)
+      .fillColor("#d1d5db")
+      .text("Premium Ecommerce Invoice", 40, 65);
 
-    // Right-aligned Invoice Title in Banner
+    // ====================================
+    // INVOICE TITLE (Right Aligned)
+    // ====================================
     doc
-      .fillColor("#ffffff")
-      .fontSize(26)
-      .text("INVOICE", 40, 42, { align: "right", width: 515 });
+      .fillColor("#111827")
+      .fontSize(24)
+      .text("INVOICE", 40, 120, { align: "right", width: 515 });
 
     // ====================================
-    // METADATA DETAILS (Clean Two-Column Grid)
+    // METADATA DETAILS (Left Side)
     // ====================================
-    let metaTop = 135;
-    doc.fillColor("#0f172a").fontSize(10);
-    
-    // Left Details
-    doc.font("Helvetica-Bold").text("Invoice To:", 40, metaTop);
-    doc.font("Helvetica").text(order.address?.name || "Customer", 40, metaTop + 15);
-    
-    // Right Details (Invoice Meta)
-    const invNumber = order.invoiceNumber || "INV-" + order._id.toString().slice(-6).toUpperCase();
-    const invDate = new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-    
-    doc.font("Helvetica-Bold").text(`Invoice No:`, 380, metaTop);
-    doc.font("Helvetica").text(invNumber, 460, metaTop, { align: "right", width: 95 });
-    
-    doc.font("Helvetica-Bold").text(`Order ID:`, 380, metaTop + 15);
-    doc.font("Helvetica").text(order._id.toString().slice(-8).toUpperCase(), 460, metaTop + 15, { align: "right", width: 95 });
-    
-    doc.font("Helvetica-Bold").text(`Date:`, 380, metaTop + 30);
-    doc.font("Helvetica").text(invDate, 460, metaTop + 30, { align: "right", width: 95 });
+    doc.fontSize(10).fillColor("#4b5563");
+    doc.text(`Invoice No: ${order.invoiceNumber || "INV-" + order._id.toString().slice(-6).toUpperCase()}`, 40, 130);
+    doc.text(`Order ID: ${order._id}`, 40, 148);
+    doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}`, 40, 166);
 
     // ====================================
-    // SHIPPING & BILLING BOX
+    // BILLING BOX (Clean Borders)
     // ====================================
-    let boxTop = 200;
     doc
-      .roundedRect(40, boxTop, 515, 75, 6)
-      .strokeColor("#e2e8f0")
-      .lineWidth(1)
+      .roundedRect(40, 205, 515, 105, 8)
+      .strokeColor("#cbd5e1")
       .stroke();
 
-    doc.font("Helvetica-Bold").fontSize(11).fillColor("#1e293b").text("Shipping Address", 55, boxTop + 12);
+    doc
+      .fontSize(13)
+      .fillColor("#111827")
+      .text("Billing Details", 55, 220);
+
+    doc.fontSize(10).fillColor("#374151");
     
-    doc.font("Helvetica").fontSize(10).fillColor("#475569");
-    doc.text(`Phone:  ${order.address?.phone || '-'}`, 55, boxTop + 32);
-    doc.text(`City:   ${order.address?.city || '-'}`, 55, boxTop + 48);
+    // Column 1 (Left side info)
+    doc.text(`Name:   ${order.address?.name || 'Customer'}`, 55, 250);
+    doc.text(`Phone:  ${order.address?.phone || '-'}`, 55, 272);
     
-    doc.text(`Address: ${order.address?.fullAddress || '-'}`, 260, boxTop + 32, {
-      width: 280,
-      lineGap: 3
+    // Column 2 (Right side info)
+    doc.text(`City:      ${order.address?.city || '-'}`, 300, 250);
+    doc.text(`Address: ${order.address?.fullAddress || '-'}`, 300, 272, {
+      width: 240,
     });
 
     // ====================================
     // TABLE HEADER
     // ====================================
-    let tableTop = 300;
+    let tableTop = 340;
 
     doc
-      .rect(40, tableTop, 515, 26)
-      .fill("#1e293b");
+      .rect(40, tableTop, 515, 30)
+      .fill("#111827");
 
-    doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(10);
-    doc.text("Product Details", 55, tableTop + 8);
-    doc.text("Qty", 320, tableTop + 8, { width: 40, align: "center" });
-    doc.text("Price", 380, tableTop + 8, { width: 70, align: "right" });
-    doc.text("Total", 460, tableTop + 8, { width: 85, align: "right" });
+    doc.fillColor("white").fontSize(11);
+    doc.text("Product", 55, tableTop + 10);
+    doc.text("Qty", 300, tableTop + 10, { width: 40, align: "center" });
+    doc.text("Price", 360, tableTop + 10, { width: 80, align: "center" });
+    doc.text("Total", 460, tableTop + 10, { width: 80, align: "right" });
 
     // ====================================
     // PRODUCT ROWS
     // ====================================
-    let y = tableTop + 26;
+    let y = tableTop + 40;
 
     order.items.forEach((item) => {
       const total = item.price * item.quantity;
 
-      // Card / Row Border Background for alternating feel
-      doc.fillColor("#0f172a").font("Helvetica").fontSize(10);
+      doc.fillColor("#374151").fontSize(10);
 
-      // Product Name wrapping
-      doc.text(item.productId?.name || "Premium Product", 55, y + 10, { width: 250 });
+      // Product Name wrapping with safe width
+      doc.text(item.productId?.name || "Product", 55, y, { width: 230 });
       
-      // Values
-      doc.text(item.quantity.toString(), 320, y + 10, { width: 40, align: "center" });
-      doc.text(`₹${item.price.toLocaleString('en-IN')}`, 380, y + 10, { width: 70, align: "right" });
-      doc.text(`₹${total.toLocaleString('en-IN')}`, 460, y + 10, { width: 85, align: "right" });
+      // Dynamic text blocks with strict alignments to stop overlapping
+      doc.text(item.quantity.toString(), 300, y, { width: 40, align: "center" });
+      doc.text(`Rs. ${item.price}`, 360, y, { width: 80, align: "center" });
+      doc.text(`Rs. ${total}`, 460, y, { width: 80, align: "right" });
 
-      // Light Border below row
+      // Clean divider lines between rows
       doc
-        .moveTo(40, y + 32)
-        .lineTo(555, y + 32)
+        .moveTo(40, y + 22)
+        .lineTo(555, y + 22)
         .strokeColor("#f1f5f9")
         .stroke();
 
-      y += 32;
+      y += 35;
     });
 
     // ====================================
-    // SUMMARY / TOTALS SECTION
+    // GRAND TOTAL (Fixed Spacing & Overlay Bug)
     // ====================================
     y += 15;
 
-    // Subtotal Row
-    doc.font("Helvetica").fontSize(10).fillColor("#64748b");
-    doc.text("Subtotal:", 360, y, { width: 100, align: "right" });
-    doc.font("Helvetica-Bold").fillColor("#1e293b");
-    doc.text(`₹${order.totalAmount.toLocaleString('en-IN')}`, 460, y, { width: 85, align: "right" });
+    // Dark Navy Box Container
+    doc
+      .roundedRect(315, y, 240, 50, 6)
+      .fill("#111827");
 
-    // Grand Total Accent Box
-    y += 20;
-    doc.rect(360, y, 195, 35).fill("#0f172a");
+    doc.fillColor("white");
+    
+    // Left Aligned Text inside the card
+    doc
+      .fontSize(12)
+      .text("Grand Total", 335, y + 19);
 
-    doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(11);
-    doc.text("Grand Total", 375, y + 12);
-    doc.fontSize(12).text(`₹${order.totalAmount.toLocaleString('en-IN')}`, 450, y + 11, {
-      width: 95,
-      align: "right"
-    });
+    // Right Aligned dynamic value inside the card (No overlapping anymore)
+    doc
+      .fontSize(15)
+      .text(`Rs. ${order.totalAmount}`, 365, y + 18, {
+        width: 175,
+        align: "right"
+      });
 
     // ====================================
     // FOOTER
     // ====================================
-    // Bottom border line above footer
-    doc
-      .moveTo(40, 730)
-      .lineTo(555, 730)
-      .strokeColor("#e2e8f0")
-      .stroke();
-
-    doc
-      .fillColor("#475569")
-      .font("Helvetica-Bold")
-      .fontSize(10)
-      .text("Thank you for shopping with Luxe Store!", 40, 745, {
-        align: "center",
-        width: 515
-      });
-
     doc
       .fillColor("#94a3b8")
-      .font("Helvetica")
-      .fontSize(8)
-      .text("If you have any questions about this invoice, please contact support@luxestore.com", 40, 760, {
+      .fontSize(10)
+      .text("Thank you for shopping with Luxe Store!", 40, 765, {
         align: "center",
         width: 515
       });
