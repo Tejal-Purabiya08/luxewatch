@@ -275,9 +275,11 @@ router.get("/invoice/:id", async (req, res) => {
 
     const PDFDocument = require("pdfkit");
 
+    // Standard A4 Layout Setup with buffer pages enabled for safe page calculations
     const doc = new PDFDocument({
       margin: 40,
       size: "A4",
+      bufferPages: true 
     });
 
     // RESPONSE HEADERS
@@ -287,163 +289,201 @@ router.get("/invoice/:id", async (req, res) => {
     doc.pipe(res);
 
     // ====================================
-    // HEADER BANNER (Premium Dark Top)
+    // REUSABLE HEADER FUNCTION
     // ====================================
-    doc.rect(0, 0, 600, 110).fill("#0f172a");
+    const drawHeader = () => {
+      // Top Dark Minimal Bar
+      doc.rect(0, 0, 600, 110).fill("#0f172a");
 
-    doc
-      .fillColor("#ffffff")
-      .fontSize(24)
-      .text("LUXE STORE", 40, 35, { stroke: false, characterSpacing: 1 });
+      doc
+        .fillColor("#ffffff")
+        .font("Helvetica-Bold")
+        .fontSize(24)
+        .text("LUXE STORE", 40, 35, { characterSpacing: 1 });
 
-    doc
-      .fontSize(10)
-      .fillColor("#94a3b8")
-      .text("Premium E-Commerce Experience", 40, 68);
+      doc
+        .fontSize(10)
+        .font("Helvetica")
+        .fillColor("#94a3b8")
+        .text("Premium E-Commerce Experience", 40, 68);
 
-    // Right-aligned Invoice Title in Banner
-    doc
-      .fillColor("#ffffff")
-      .fontSize(26)
-      .text("INVOICE", 40, 42, { align: "right", width: 515 });
+      // Right-aligned Invoice Title in Banner
+      doc
+        .fillColor("#ffffff")
+        .font("Helvetica-Bold")
+        .fontSize(26)
+        .text("INVOICE", 40, 42, { align: "right", width: 515 });
+    };
+
+    // First page header print karein
+    drawHeader();
 
     // ====================================
     // METADATA DETAILS (Clean Two-Column Grid)
     // ====================================
-    let metaTop = 135;
+    let currentY = 135;
     doc.fillColor("#0f172a").fontSize(10);
     
     // Left Details
-    doc.font("Helvetica-Bold").text("Invoice To:", 40, metaTop);
-    doc.font("Helvetica").text(order.address?.name || "Customer", 40, metaTop + 15);
+    doc.font("Helvetica-Bold").text("Invoice To:", 40, currentY);
+    doc.font("Helvetica").text(order.address?.name || "Customer", 40, currentY + 15);
     
     // Right Details (Invoice Meta)
     const invNumber = order.invoiceNumber || "INV-" + order._id.toString().slice(-6).toUpperCase();
     const invDate = new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
     
-    doc.font("Helvetica-Bold").text(`Invoice No:`, 380, metaTop);
-    doc.font("Helvetica").text(invNumber, 460, metaTop, { align: "right", width: 95 });
+    doc.font("Helvetica-Bold").text(`Invoice No:`, 380, currentY);
+    doc.font("Helvetica").text(invNumber, 460, currentY, { align: "right", width: 95 });
     
-    doc.font("Helvetica-Bold").text(`Order ID:`, 380, metaTop + 15);
-    doc.font("Helvetica").text(order._id.toString().slice(-8).toUpperCase(), 460, metaTop + 15, { align: "right", width: 95 });
+    doc.font("Helvetica-Bold").text(`Order ID:`, 380, currentY + 15);
+    doc.font("Helvetica").text(order._id.toString().slice(-8).toUpperCase(), 460, currentY + 15, { align: "right", width: 95 });
     
-    doc.font("Helvetica-Bold").text(`Date:`, 380, metaTop + 30);
-    doc.font("Helvetica").text(invDate, 460, metaTop + 30, { align: "right", width: 95 });
+    doc.font("Helvetica-Bold").text(`Date:`, 380, currentY + 30);
+    doc.font("Helvetica").text(invDate, 460, currentY + 30, { align: "right", width: 95 });
 
     // ====================================
     // SHIPPING & BILLING BOX
     // ====================================
-    let boxTop = 200;
+    currentY = 200;
     doc
-      .roundedRect(40, boxTop, 515, 75, 6)
+      .roundedRect(40, currentY, 515, 75, 6)
       .strokeColor("#e2e8f0")
       .lineWidth(1)
       .stroke();
 
-    doc.font("Helvetica-Bold").fontSize(11).fillColor("#1e293b").text("Shipping Address", 55, boxTop + 12);
+    doc.font("Helvetica-Bold").fontSize(11).fillColor("#1e293b").text("Shipping Address", 55, currentY + 12);
     
     doc.font("Helvetica").fontSize(10).fillColor("#475569");
-    doc.text(`Phone:  ${order.address?.phone || '-'}`, 55, boxTop + 32);
-    doc.text(`City:   ${order.address?.city || '-'}`, 55, boxTop + 48);
+    doc.text(`Phone:  ${order.address?.phone || '-'}`, 55, currentY + 32);
+    doc.text(`City:   ${order.address?.city || '-'}`, 55, currentY + 48);
     
-    doc.text(`Address: ${order.address?.fullAddress || '-'}`, 260, boxTop + 32, {
+    doc.text(`Address: ${order.address?.fullAddress || '-'}`, 260, currentY + 32, {
       width: 280,
       lineGap: 3
     });
 
     // ====================================
-    // TABLE HEADER
+    // REUSABLE TABLE HEADER FUNCTION
     // ====================================
-    let tableTop = 300;
+    currentY = 300;
+    const drawTableHeader = (startY) => {
+      doc.rect(40, startY, 515, 26).fill("#1e293b");
+      doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(10);
+      doc.text("Product Details", 55, startY + 8);
+      doc.text("Qty", 320, startY + 8, { width: 40, align: "center" });
+      doc.text("Price", 380, startY + 8, { width: 70, align: "right" });
+      doc.text("Total", 460, startY + 8, { width: 85, align: "right" });
+    };
 
-    doc
-      .rect(40, tableTop, 515, 26)
-      .fill("#1e293b");
-
-    doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(10);
-    doc.text("Product Details", 55, tableTop + 8);
-    doc.text("Qty", 320, tableTop + 8, { width: 40, align: "center" });
-    doc.text("Price", 380, tableTop + 8, { width: 70, align: "right" });
-    doc.text("Total", 460, tableTop + 8, { width: 85, align: "right" });
+    drawTableHeader(currentY);
+    currentY += 26;
 
     // ====================================
-    // PRODUCT ROWS
+    // PRODUCT ROWS (Dynamic Height & Page-break Safe)
     // ====================================
-    let y = tableTop + 26;
-
-    order.items.forEach((item) => {
+    order.items.forEach((item, index) => {
       const total = item.price * item.quantity;
+      const productName = item.productId?.name || "Premium Product";
+      
+      // Calculate text height dynamically to prevent overlap
+      const textHeight = doc.heightOfString(productName, { width: 250 });
+      const rowHeight = Math.max(textHeight + 16, 32); 
 
-      // Card / Row Border Background for alternating feel
+      // Page overflow check (700 tak safe limit hoti hai)
+      if (currentY + rowHeight > 700) {
+        doc.addPage();
+        drawHeader();
+        currentY = 135;
+        drawTableHeader(currentY);
+        currentY += 26;
+      }
+
+      // Alternating light background row styling
+      if (index % 2 === 0) {
+        doc.rect(40, currentY, 515, rowHeight).fill("#f8fafc");
+      }
+
       doc.fillColor("#0f172a").font("Helvetica").fontSize(10);
 
-      // Product Name wrapping
-      doc.text(item.productId?.name || "Premium Product", 55, y + 10, { width: 250 });
+      // Product Name wrapping strictly inside width bounds
+      doc.text(productName, 55, currentY + 10, { width: 250 });
       
-      // Values
-      doc.text(item.quantity.toString(), 320, y + 10, { width: 40, align: "center" });
-      doc.text(`₹${item.price.toLocaleString('en-IN')}`, 380, y + 10, { width: 70, align: "right" });
-      doc.text(`₹${total.toLocaleString('en-IN')}`, 460, y + 10, { width: 85, align: "right" });
+      // Values (Using clean standard INR format instead of broken symbol)
+      doc.text(item.quantity.toString(), 320, currentY + 10, { width: 40, align: "center" });
+      doc.text(`INR ${item.price.toLocaleString('en-IN')}`, 380, currentY + 10, { width: 70, align: "right" });
+      doc.text(`INR ${total.toLocaleString('en-IN')}`, 460, currentY + 10, { width: 85, align: "right" });
 
-      // Light Border below row
+      // Light Divider Line below row
       doc
-        .moveTo(40, y + 32)
-        .lineTo(555, y + 32)
+        .moveTo(40, currentY + rowHeight)
+        .lineTo(555, currentY + rowHeight)
         .strokeColor("#f1f5f9")
         .stroke();
 
-      y += 32;
+      currentY += rowHeight;
     });
 
     // ====================================
     // SUMMARY / TOTALS SECTION
     // ====================================
-    y += 15;
+    currentY += 15;
+
+    // Check custom space for Summary block
+    if (currentY + 65 > 710) {
+      doc.addPage();
+      drawHeader();
+      currentY = 135;
+    }
 
     // Subtotal Row
     doc.font("Helvetica").fontSize(10).fillColor("#64748b");
-    doc.text("Subtotal:", 360, y, { width: 100, align: "right" });
+    doc.text("Subtotal:", 360, currentY, { width: 100, align: "right" });
     doc.font("Helvetica-Bold").fillColor("#1e293b");
-    doc.text(`₹${order.totalAmount.toLocaleString('en-IN')}`, 460, y, { width: 85, align: "right" });
+    doc.text(`INR ${order.totalAmount.toLocaleString('en-IN')}`, 460, currentY, { width: 85, align: "right" });
 
     // Grand Total Accent Box
-    y += 20;
-    doc.rect(360, y, 195, 35).fill("#0f172a");
+    currentY += 20;
+    doc.rect(360, currentY, 195, 35).fill("#0f172a");
 
     doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(11);
-    doc.text("Grand Total", 375, y + 12);
-    doc.fontSize(12).text(`₹${order.totalAmount.toLocaleString('en-IN')}`, 450, y + 11, {
+    doc.text("Grand Total", 375, currentY + 12);
+    doc.fontSize(12).text(`INR ${order.totalAmount.toLocaleString('en-IN')}`, 450, currentY + 11, {
       width: 95,
       align: "right"
     });
 
     // ====================================
-    // FOOTER
+    // FOOTER (Multi-page Loop Engine)
     // ====================================
-    // Bottom border line above footer
-    doc
-      .moveTo(40, 730)
-      .lineTo(555, 730)
-      .strokeColor("#e2e8f0")
-      .stroke();
+    const pages = doc._bufferedPages;
+    pages.forEach((page, i) => {
+      doc.switchToPage(i);
+      
+      // Bottom line layout
+      doc
+        .moveTo(40, 730)
+        .lineTo(555, 730)
+        .strokeColor("#e2e8f0")
+        .stroke();
 
-    doc
-      .fillColor("#475569")
-      .font("Helvetica-Bold")
-      .fontSize(10)
-      .text("Thank you for shopping with Luxe Store!", 40, 745, {
-        align: "center",
-        width: 515
-      });
+      doc
+        .fillColor("#475569")
+        .font("Helvetica-Bold")
+        .fontSize(10)
+        .text("Thank you for shopping with Luxe Store!", 40, 745, {
+          align: "center",
+          width: 515
+        });
 
-    doc
-      .fillColor("#94a3b8")
-      .font("Helvetica")
-      .fontSize(8)
-      .text("If you have any questions about this invoice, please contact support@luxestore.com", 40, 760, {
-        align: "center",
-        width: 515
-      });
+      doc
+        .fillColor("#94a3b8")
+        .font("Helvetica")
+        .fontSize(8)
+        .text(`Page ${i + 1} of ${pages.length}  |  If you have any questions, please contact support@luxestore.com`, 40, 760, {
+          align: "center",
+          width: 515
+        });
+    });
 
     doc.end();
 
